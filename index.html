@@ -479,8 +479,17 @@
 
             processSpokenWords(spokenText) {
                 const words = spokenText.trim().split(/\s+/);
-                const currentSurah = this.quranDatabase[1]; // Currently using Al-Fatiha
                 
+                // 🔍 SMART AUTO-DETECTION: Find starting position if not currently tracking
+                if (this.currentWordIndex === 0 || !this.isCurrentlyTracking) {
+                    const detectedPosition = this.detectStartingPosition(words);
+                    if (detectedPosition) {
+                        this.jumpToDetectedPosition(detectedPosition);
+                        this.updateStatus(`Auto-detected: ${detectedPosition.surah}, Verse ${detectedPosition.verse}`);
+                    }
+                }
+                
+                // Continue word-by-word verification
                 for (let word of words) {
                     const cleanWord = this.cleanArabicText(word);
                     const expectedWord = this.getCurrentExpectedWord();
@@ -495,6 +504,60 @@
                 }
                 
                 this.updateAccuracy();
+            }
+
+            // 🧠 AI-POWERED AYAT DETECTION
+            detectStartingPosition(spokenWords) {
+                const searchText = spokenWords.join(' ');
+                
+                // Search through all verses in database
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
+                    for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
+                        const verse = surah.verses[verseIndex];
+                        
+                        // Check if spoken words match beginning of any verse
+                        if (this.matchesVerseStart(spokenWords, verse)) {
+                            return {
+                                surah: surah.name,
+                                surahNumber: parseInt(surahNum),
+                                verse: verseIndex + 1,
+                                wordIndex: this.calculateGlobalWordIndex(surahNum, verseIndex, 0)
+                            };
+                        }
+                    }
+                }
+                return null;
+            }
+
+            matchesVerseStart(spokenWords, verseWords) {
+                if (spokenWords.length > verseWords.length) return false;
+                
+                for (let i = 0; i < Math.min(spokenWords.length, 3); i++) {
+                    const cleanSpoken = this.cleanArabicText(spokenWords[i]);
+                    const cleanVerse = this.cleanArabicText(verseWords[i]);
+                    
+                    if (!this.isWordMatch(cleanSpoken, cleanVerse)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            jumpToDetectedPosition(position) {
+                this.currentWordIndex = position.wordIndex;
+                this.isCurrentlyTracking = true;
+                
+                // Update UI to show detected position
+                const allWords = document.querySelectorAll('.word');
+                allWords.forEach(w => w.classList.remove('current'));
+                
+                if (this.currentWordIndex < allWords.length) {
+                    allWords[this.currentWordIndex].classList.add('current');
+                    this.scrollToCurrentWord();
+                }
+                
+                this.updatePosition();
             }
 
             cleanArabicText(text) {
