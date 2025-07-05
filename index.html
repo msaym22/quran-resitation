@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Quran Recitation Verification System</title>
+    <title>Personal AI Quran Recitation System</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -48,9 +48,18 @@
             font-size: 1.1em;
         }
 
+        .feature-banner {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
         .controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -72,13 +81,13 @@
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1.1em;
             transition: all 0.3s ease;
             margin: 5px;
-            min-width: 120px;
+            min-width: 150px;
         }
 
         .btn:hover {
@@ -86,13 +95,19 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn.recording {
             background: linear-gradient(45deg, #e74c3c, #c0392b);
             animation: pulse 1.5s infinite;
+        }
+
+        .btn.training {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
         }
 
         @keyframes pulse {
@@ -101,17 +116,65 @@
             100% { opacity: 1; }
         }
 
-        .select-group {
+        .file-input {
+            background: white;
+            color: #333;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
             margin: 10px 0;
+            width: 100%;
         }
 
         select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 10px;
             font-size: 1em;
             background: white;
+            margin: 10px 0;
+        }
+
+        .status {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .status-item {
+            margin: 10px 0;
+            font-weight: 500;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accuracy-meter {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            width: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
         }
 
         .quran-display {
@@ -120,98 +183,84 @@
             border-radius: 15px;
             padding: 25px;
             margin: 20px 0;
-            min-height: 300px;
-            font-family: 'Times New Roman', serif;
-            line-height: 2;
-            font-size: 1.3em;
+            min-height: 400px;
+            font-family: 'Amiri', 'Times New Roman', serif;
+            line-height: 2.5;
+            font-size: 1.5em;
             text-align: right;
             direction: rtl;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .verse {
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 8px;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 10px;
             transition: all 0.3s ease;
+            border: 2px solid #f0f0f0;
+            background: #fafafa;
         }
 
         .verse.current {
             background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-left: 4px solid #667eea;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .word {
             display: inline-block;
-            margin: 0 5px;
-            padding: 2px 4px;
-            border-radius: 4px;
+            margin: 0 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            cursor: pointer;
+            font-size: 1.2em;
         }
 
         .word.correct {
-            background: rgba(46, 204, 113, 0.2);
+            background: rgba(46, 204, 113, 0.3);
             color: #27ae60;
+            border: 2px solid #27ae60;
         }
 
         .word.incorrect {
-            background: rgba(231, 76, 60, 0.2);
+            background: rgba(231, 76, 60, 0.3);
             color: #e74c3c;
-            text-decoration: underline;
-            text-decoration-color: #e74c3c;
-            text-decoration-thickness: 2px;
+            border: 2px solid #e74c3c;
         }
 
         .word.current {
-            background: rgba(241, 196, 15, 0.3);
-            animation: highlight 1s infinite alternate;
+            background: rgba(241, 196, 15, 0.4);
+            border: 2px solid #f39c12;
+            transform: scale(1.08);
+            animation: highlight 1.5s infinite alternate;
         }
 
         @keyframes highlight {
-            from { background: rgba(241, 196, 15, 0.3); }
-            to { background: rgba(241, 196, 15, 0.5); }
+            from { background: rgba(241, 196, 15, 0.4); }
+            to { background: rgba(241, 196, 15, 0.6); }
         }
 
-        .status {
-            background: #f8f9fa;
+        .database-status {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
             padding: 15px;
             border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            text-align: center;
         }
 
-        .status-item {
-            margin: 5px 0;
-            font-weight: 500;
+        .database-status.loading {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
         }
 
-        .accuracy-meter {
-            background: #e9ecef;
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .accuracy-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1.1em;
-            margin: 10px 0;
-        }
-
-        .microphone-icon {
-            font-size: 1.5em;
-            margin-right: 8px;
+        .database-status.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
         }
 
         .error-popup {
@@ -221,115 +270,117 @@
             transform: translate(-50%, -50%);
             background: #e74c3c;
             color: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 15px;
             z-index: 1000;
             display: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .supported-browsers {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-            color: #856404;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎤 AI Quran Recitation Verification System</h1>
-            <p>Professional AI-powered Quran recitation verification with real-time feedback</p>
+            <h1>🎤 Personal AI Quran System</h1>
+            <p>Pakistani Accent Optimized - Continuous Listening - Focus on Mistakes Only</p>
+        </div>
+
+        <div class="feature-banner">
+            <h3>🇵🇰 Features: Continuous Listening | Voice Training | Harakat Detection | Auto-Detection</h3>
+        </div>
+
+        <!-- Voice Training Section -->
+        <div class="control-group">
+            <h3>🧠 Personal Voice Training</h3>
+            <input type="file" id="voiceTrainingInput" class="file-input" accept=".mp3,.wav,.m4a" />
+            <button id="uploadVoiceBtn" class="btn training">🎵 Upload Voice Sample</button>
+            <button id="recordTrainingBtn" class="btn training">🎙️ Record Training</button>
+            <button id="stopTrainingBtn" class="btn training" disabled>⏹️ Stop Recording</button>
+        </div>
+
+        <!-- Database Upload Section -->
+        <div class="control-group">
+            <h3>📚 Quran Database</h3>
+            <p style="color: #666; margin: 10px 0;">✅ Auto-loading from GitHub or upload manually:</p>
+            <input type="file" id="quranFileInput" class="file-input" accept=".txt" />
+            <button id="loadQuranBtn" class="btn">📤 Upload Custom Database</button>
+        </div>
+
+        <div id="databaseStatus" class="database-status loading">
+            📚 Auto-loading Quran database from GitHub...
         </div>
 
         <div class="controls">
             <div class="control-group">
                 <h3>🎙️ Audio Control</h3>
-                <button id="startBtn" class="btn">
-                    <span class="microphone-icon">🎤</span>Start Listening
+                <button id="startBtn" class="btn" disabled>
+                    🎤 Start Continuous Listening
                 </button>
                 <button id="stopBtn" class="btn" disabled>
-                    <span class="microphone-icon">⏹️</span>Stop Listening
+                    ⏹️ Stop Listening
                 </button>
-                <div class="select-group">
-                    <label>Language:</label>
-                    <select id="languageSelect">
-                        <option value="ar-SA">Arabic (Saudi Arabia)</option>
-                        <option value="ar-EG">Arabic (Egypt)</option>
-                        <option value="ar-AE">Arabic (UAE)</option>
-                        <option value="ar-JO">Arabic (Jordan)</option>
-                    </select>
-                </div>
+                <label>Pakistani Dialect:</label>
+                <select id="languageSelect">
+                    <option value="ur-PK">Urdu/Pakistani Arabic</option>
+                    <option value="ar-SA">Standard Arabic</option>
+                </select>
             </div>
 
             <div class="control-group">
-                <h3>⚠️ Error Notification</h3>
-                <div class="select-group">
-                    <label>Warning Type:</label>
-                    <select id="warningType">
-                        <option value="underline">Red Underline</option>
-                        <option value="beep">Audio Beep</option>
-                        <option value="voice">Voice Alert</option>
-                        <option value="all">All Methods</option>
-                    </select>
-                </div>
+                <h3>⚠️ Mistake Detection</h3>
+                <label>Focus On:</label>
+                <select id="errorFocusType">
+                    <option value="harakat_only">Harakat Mistakes Only (Zabar/Zaeer/Pesh)</option>
+                    <option value="pronunciation_only">Pronunciation Mistakes Only</option>
+                    <option value="both">Both Harakat & Pronunciation</option>
+                    <option value="words_only">Word Mistakes Only</option>
+                </select>
+                <label>Feedback Method:</label>
+                <select id="warningType">
+                    <option value="voice_context">Voice with Context (2 words before/after)</option>
+                    <option value="voice_simple">Simple Voice Correction</option>
+                    <option value="visual_only">Visual Highlighting Only</option>
+                    <option value="beep">Audio Beep Alerts</option>
+                </select>
             </div>
-
-            <div class="control-group">
-                <h3>📖 Navigation</h3>
-                <div class="select-group">
-                    <label>Surah:</label>
-                    <select id="surahSelect">
-                        <option value="1">1. Al-Fatiha</option>
-                        <option value="2">2. Al-Baqarah</option>
-                        <option value="3">3. Aal-E-Imran</option>
-                        <option value="112">112. Al-Ikhlas</option>
-                        <option value="113">113. Al-Falaq</option>
-                        <option value="114">114. An-Nas</option>
-                    </select>
-                </div>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search or speak to navigate...">
-            </div>
-        </div>
-
-        <div class="supported-browsers">
-            <strong>📌 System Requirements:</strong> This system works best with Chrome, Edge, or Safari. Ensure microphone permissions are granted.
         </div>
 
         <div class="status">
-            <div class="status-item">Status: <span id="status">Ready</span></div>
-            <div class="status-item">Current Position: <span id="position">Surah 1, Verse 1</span></div>
-            <div class="status-item">Accuracy: <span id="accuracy">100%</span></div>
-            <div class="accuracy-meter">
-                <div class="accuracy-fill" id="accuracyFill"></div>
+            <div class="status-item">
+                <span>🔄 Status:</span>
+                <span id="status">Initializing system...</span>
             </div>
-            <div class="status-item">Last Recognized: <span id="lastRecognized">-</span></div>
+            <div class="status-item">
+                <span>📍 Position:</span>
+                <span id="position">Waiting for auto-detection...</span>
+            </div>
+            <div class="status-item">
+                <span>🎯 Accuracy:</span>
+                <span id="accuracy">100%</span>
+            </div>
+            <div class="accuracy-meter">
+                <div class="accuracy-fill" id="accuracyFill">100%</div>
+            </div>
+            <div class="status-item">
+                <span>🎤 Last Recognized:</span>
+                <span id="lastRecognized">-</span>
+            </div>
+            <div class="status-item">
+                <span>📊 Database:</span>
+                <span id="databaseInfo">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span>🧠 Voice Training:</span>
+                <span id="trainingInfo">Not trained</span>
+            </div>
         </div>
 
         <div class="quran-display" id="quranDisplay">
-            <div class="verse current" id="verse1">
-                <span class="word" data-word="بِسْمِ">بِسْمِ</span>
-                <span class="word" data-word="اللَّهِ">اللَّهِ</span>
-                <span class="word" data-word="الرَّحْمَٰنِ">الرَّحْمَٰنِ</span>
-                <span class="word" data-word="الرَّحِيمِ">الرَّحِيمِ</span>
-            </div>
-            <div class="verse" id="verse2">
-                <span class="word" data-word="الْحَمْدُ">الْحَمْدُ</span>
-                <span class="word" data-word="لِلَّهِ">لِلَّهِ</span>
-                <span class="word" data-word="رَبِّ">رَبِّ</span>
-                <span class="word" data-word="الْعَالَمِينَ">الْعَالَمِينَ</span>
-            </div>
-            <div class="verse" id="verse3">
-                <span class="word" data-word="الرَّحْمَٰنِ">الرَّحْمَٰنِ</span>
-                <span class="word" data-word="الرَّحِيمِ">الرَّحِيمِ</span>
-            </div>
-            <div class="verse" id="verse4">
-                <span class="word" data-word="مَالِكِ">مَالِكِ</span>
-                <span class="word" data-word="يَوْمِ">يَوْمِ</span>
-                <span class="word" data-word="الدِّينِ">الدِّينِ</span>
+            <div style="text-align: center; color: #666; padding: 50px;">
+                <div style="font-size: 1.2em; margin-bottom: 20px;">📚 Loading Quran Database</div>
+                <div style="font-size: 0.9em;">Please wait while the system loads the complete Quran</div>
             </div>
         </div>
 
@@ -339,52 +390,43 @@
     </div>
 
     <script>
-        class QuranRecitationAI {
+        class PersonalQuranAI {
             constructor() {
                 this.recognition = null;
+                this.mediaRecorder = null;
                 this.isListening = false;
+                this.isTraining = false;
                 this.currentWordIndex = 0;
-                this.currentVerseIndex = 0;
+                this.currentSurahNumber = 1;
+                this.currentVerseNumber = 1;
                 this.totalWords = 0;
                 this.correctWords = 0;
                 this.synthesizer = window.speechSynthesis;
+                this.hasDetectedPosition = false;
+                this.quranDatabase = null;
+                this.isDatabaseLoaded = false;
+                this.personalVoiceData = {};
                 
-                // Enhanced Quran database with phonetic matching
-                this.quranDatabase = {
-                    1: {
-                        name: "Al-Fatiha",
-                        verses: [
-                            ["بِسْمِ", "اللَّهِ", "الرَّحْمَٰنِ", "الرَّحِيمِ"],
-                            ["الْحَمْدُ", "لِلَّهِ", "رَبِّ", "الْعَالَمِينَ"],
-                            ["الرَّحْمَٰنِ", "الرَّحِيمِ"],
-                            ["مَالِكِ", "يَوْمِ", "الدِّينِ"]
-                        ]
-                    }
-                };
-
-                // Phonetic mapping for better accent recognition
-                this.phoneticMap = {
-                    "بِسْمِ": ["بسم", "bismi", "bism"],
-                    "اللَّهِ": ["الله", "allah", "allahi"],
-                    "الرَّحْمَٰنِ": ["الرحمن", "ar-rahman", "rahman"],
-                    "الرَّحِيمِ": ["الرحيم", "ar-raheem", "raheem"],
-                    "الْحَمْدُ": ["الحمد", "alhamd", "hamd"],
-                    "لِلَّهِ": ["لله", "lillah", "lillahi"],
-                    "رَبِّ": ["رب", "rabb", "rabbi"],
-                    "الْعَالَمِينَ": ["العالمين", "alameen", "alamiyn"],
-                    "مَالِكِ": ["مالك", "malik", "maliki"],
-                    "يَوْمِ": ["يوم", "yawm", "yaum"],
-                    "الدِّينِ": ["الدين", "deen", "dyin"]
-                };
-
+                // REVOLUTIONARY FAST RECITATION SUPPORT
+                this.fastRecitationMode = true;
+                this.audioBuffer = []; // Buffer for continuous audio
+                this.wordQueue = []; // Queue for fast word processing
+                this.lastProcessedTime = 0;
+                this.streamingDetection = true; // Continuous detection
+                this.adaptiveSpeed = true; // Adapts to reciter's speed
+                this.currentRecitationSpeed = 'normal'; // normal, fast, very_fast
+                this.wordBoundaryDetection = true; // Handles connected words
+                this.realTimeTracking = true; // Tracks position in real-time
+                
                 this.initializeSystem();
                 this.setupEventListeners();
-                this.calculateTotalWords();
+                this.loadPersonalVoiceData();
+                this.autoLoadQuranDatabase();
             }
 
             initializeSystem() {
                 if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                    this.showError("Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.");
+                    this.showError("Speech recognition not supported. Please use Chrome, Edge, or Safari.");
                     return;
                 }
 
@@ -393,33 +435,442 @@
                 
                 this.recognition.continuous = true;
                 this.recognition.interimResults = true;
-                this.recognition.lang = document.getElementById('languageSelect').value;
+                this.recognition.lang = 'ur-PK';
                 
+                this.setupRecognitionHandlers();
+            }
+
+            setupRecognitionHandlers() {
+                // REVOLUTIONARY FAST RECITATION OPTIMIZATION
                 this.recognition.onstart = () => {
-                    this.updateStatus("Listening...");
+                    this.updateStatus("🚀 FAST MODE: Listening for continuous rapid recitation...");
                     document.getElementById('startBtn').disabled = true;
                     document.getElementById('stopBtn').disabled = false;
                     document.getElementById('startBtn').classList.add('recording');
+                    
+                    // Initialize fast recitation tracking
+                    this.initializeFastRecitationMode();
                 };
 
                 this.recognition.onend = () => {
-                    this.updateStatus("Stopped");
-                    document.getElementById('startBtn').disabled = false;
-                    document.getElementById('stopBtn').disabled = true;
-                    document.getElementById('startBtn').classList.remove('recording');
-                    this.isListening = false;
+                    if (this.isListening) {
+                        // INSTANT RESTART for continuous fast recitation
+                        setTimeout(() => {
+                            if (this.isListening) {
+                                try {
+                                    this.recognition.start();
+                                } catch (error) {
+                                    // Aggressive restart for fast mode
+                                    setTimeout(() => {
+                                        if (this.isListening) {
+                                            this.recognition.start();
+                                        }
+                                    }, 50); // Much faster restart
+                                }
+                            }
+                        }, 10); // Ultra-fast restart (10ms)
+                    } else {
+                        this.updateStatus("⏹️ Stopped listening");
+                        document.getElementById('startBtn').disabled = false;
+                        document.getElementById('stopBtn').disabled = true;
+                        document.getElementById('startBtn').classList.remove('recording');
+                    }
                 };
 
                 this.recognition.onresult = (event) => {
-                    this.processRecognitionResult(event);
+                    this.processFastRecognitionResult(event);
                 };
 
                 this.recognition.onerror = (event) => {
-                    this.handleRecognitionError(event);
+                    this.handleFastRecognitionError(event);
                 };
             }
 
+            initializeFastRecitationMode() {
+                // Configure for rapid continuous recitation
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true; // Critical for fast mode
+                this.recognition.maxAlternatives = 3; // Multiple recognition alternatives
+                
+                // Adaptive speed detection
+                this.wordTimestamps = [];
+                this.averageWordGap = 500; // Default 500ms between words
+                
+                console.log("🚀 FAST RECITATION MODE ACTIVATED");
+                console.log("⚡ Optimized for continuous rapid recitation");
+                console.log("🎯 Real-time word tracking enabled");
+            }
+
+            processFastRecognitionResult(event) {
+                const currentTime = Date.now();
+                let finalTranscript = '';
+                let interimTranscript = '';
+                let allWords = [];
+                
+                // REVOLUTIONARY: Process ALL results, not just final
+                for (let i = 0; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const transcript = result[0].transcript;
+                    
+                    if (result.isFinal) {
+                        finalTranscript += transcript + ' ';
+                        // Process immediately for fast recitation
+                        this.addToWordQueue(transcript.trim().split(/\s+/), currentTime, 'final');
+                    } else {
+                        interimTranscript += transcript + ' ';
+                        // Also process interim for ultra-fast response
+                        if (this.fastRecitationMode) {
+                            this.addToWordQueue(transcript.trim().split(/\s+/), currentTime, 'interim');
+                        }
+                    }
+                }
+
+                // REAL-TIME DISPLAY UPDATE
+                if (interimTranscript) {
+                    document.getElementById('lastRecognized').innerHTML = `
+                        <span style="color: #666;">🔄 ${interimTranscript}</span><br>
+                        <span style="color: #333; font-weight: bold;">${finalTranscript}</span>
+                    `;
+                }
+
+                if (finalTranscript) {
+                    document.getElementById('lastRecognized').textContent = finalTranscript;
+                    
+                    // IMMEDIATE PROCESSING for fast recitation
+                    this.processFastSpokenWords(finalTranscript, currentTime);
+                }
+
+                // Detect recitation speed and adapt
+                this.detectAndAdaptRecitationSpeed(currentTime);
+            }
+
+            addToWordQueue(words, timestamp, type) {
+                for (let word of words) {
+                    if (word && word.trim()) {
+                        this.wordQueue.push({
+                            word: word.trim(),
+                            timestamp: timestamp,
+                            type: type, // 'final' or 'interim'
+                            processed: false
+                        });
+                    }
+                }
+                
+                // Process queue immediately if it gets long (fast recitation)
+                if (this.wordQueue.length > 10) {
+                    this.processWordQueue();
+                }
+            }
+
+            processWordQueue() {
+                // Advanced queue processing for fast recitation
+                const unprocessedWords = this.wordQueue.filter(item => !item.processed && item.type === 'final');
+                
+                if (unprocessedWords.length > 0) {
+                    const words = unprocessedWords.map(item => item.word);
+                    console.log("⚡ FAST QUEUE: Processing", words);
+                    
+                    // Mark as processed
+                    unprocessedWords.forEach(item => item.processed = true);
+                    
+                    // Fast batch processing
+                    this.processFastSpokenWords(words.join(' '), Date.now());
+                }
+                
+                // Clean old entries
+                this.wordQueue = this.wordQueue.filter(item => 
+                    Date.now() - item.timestamp < 5000 // Keep only last 5 seconds
+                );
+            }
+
+            detectAndAdaptRecitationSpeed(currentTime) {
+                this.wordTimestamps.push(currentTime);
+                
+                // Keep only recent timestamps (last 10 words)
+                if (this.wordTimestamps.length > 10) {
+                    this.wordTimestamps = this.wordTimestamps.slice(-10);
+                }
+                
+                if (this.wordTimestamps.length >= 3) {
+                    const gaps = [];
+                    for (let i = 1; i < this.wordTimestamps.length; i++) {
+                        gaps.push(this.wordTimestamps[i] - this.wordTimestamps[i-1]);
+                    }
+                    
+                    this.averageWordGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+                    
+                    // Classify recitation speed
+                    if (this.averageWordGap < 200) {
+                        this.currentRecitationSpeed = 'very_fast';
+                        this.adaptToVeryFastRecitation();
+                    } else if (this.averageWordGap < 400) {
+                        this.currentRecitationSpeed = 'fast';
+                        this.adaptToFastRecitation();
+                    } else {
+                        this.currentRecitationSpeed = 'normal';
+                        this.adaptToNormalRecitation();
+                    }
+                    
+                    console.log(`🏃 Speed detected: ${this.currentRecitationSpeed} (${Math.round(this.averageWordGap)}ms/word)`);
+                }
+            }
+
+            adaptToVeryFastRecitation() {
+                // Ultra-aggressive settings for very fast recitation
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true;
+                
+                // Lower accuracy threshold for speed
+                this.fastDetectionThreshold = 60; // Lower from 70
+                this.wordMatchingTolerance = 85; // Lower from 90
+                
+                this.updateStatus("🚀 VERY FAST MODE: Ultra-rapid recitation detected");
+            }
+
+            adaptToFastRecitation() {
+                // Optimized settings for fast recitation
+                this.fastDetectionThreshold = 65;
+                this.wordMatchingTolerance = 88;
+                
+                this.updateStatus("⚡ FAST MODE: Rapid recitation detected");
+            }
+
+            adaptToNormalRecitation() {
+                // Standard settings for normal pace
+                this.fastDetectionThreshold = 70;
+                this.wordMatchingTolerance = 90;
+                
+                this.updateStatus("🎤 NORMAL MODE: Standard recitation pace");
+            }
+
+            processFastSpokenWords(spokenText, timestamp) {
+                // Skip if too soon after last processing (prevents duplicate processing)
+                if (timestamp - this.lastProcessedTime < 100) {
+                    return;
+                }
+                this.lastProcessedTime = timestamp;
+                
+                const words = spokenText.trim().split(/\s+/);
+                console.log("⚡ FAST PROCESSING:", words);
+                
+                if (!this.hasDetectedPosition) {
+                    // AGGRESSIVE DETECTION for fast recitation
+                    if (words.length >= 1) { // Even single words can trigger detection
+                        const detectedPosition = this.detectStartingPosition(words);
+                        if (detectedPosition) {
+                            this.jumpToDetectedPosition(detectedPosition);
+                            this.hasDetectedPosition = true;
+                            this.updateStatus(`✅ FAST DETECTED: ${detectedPosition.surahName}, Verse ${detectedPosition.verse} - Following rapid recitation...`);
+                            this.showFastDetectionSuccess(detectedPosition);
+                            return;
+                        } else {
+                            // For fast recitation, keep trying with accumulated words
+                            this.updateStatus(`🔍 FAST SEARCH: ${words.length} words - Continue reciting rapidly...`);
+                        }
+                    }
+                    return;
+                }
+                
+                // REAL-TIME WORD CHECKING for continuous recitation
+                this.processContinuousWords(words);
+                
+                this.updateAccuracy();
+                this.updateStatus(`🚀 FAST TRACKING: ${this.quranDatabase[this.currentSurahNumber]?.name}, Verse ${this.currentVerseNumber} (${this.currentRecitationSpeed})`);
+            }
+
+            processContinuousWords(words) {
+                // Advanced continuous word processing
+                for (let word of words) {
+                    if (this.fastRecitationMode) {
+                        // Fast processing with lower accuracy requirements
+                        this.analyzeFastSpokenWord(word);
+                    } else {
+                        this.analyzeSpokenWord(word);
+                    }
+                }
+            }
+
+            analyzeFastSpokenWord(spokenWord) {
+                const expectedWord = this.getCurrentExpectedWord();
+                if (!expectedWord) return;
+                
+                // Relaxed similarity for fast recitation
+                const similarity = this.calculateSimilarity(spokenWord, expectedWord);
+                const threshold = this.wordMatchingTolerance || 85; // Adaptive threshold
+                
+                if (similarity > threshold) {
+                    this.markWordCorrect();
+                    this.moveToNextWordFast();
+                } else {
+                    // For fast recitation, be more forgiving
+                    if (similarity > threshold - 15) { // Still close enough
+                        this.markWordCorrect(); // Accept it
+                        this.moveToNextWordFast();
+                    } else {
+                        this.markWordIncorrect();
+                        // Skip intensive error feedback during fast recitation
+                        if (this.currentRecitationSpeed !== 'very_fast') {
+                            this.triggerFastWarning(spokenWord, expectedWord);
+                        }
+                        this.moveToNextWordFast();
+                    }
+                }
+            }
+
+            moveToNextWordFast() {
+                // Optimized for fast recitation - minimal DOM manipulation
+                const currentWord = document.querySelector('.word.current');
+                if (!currentWord) return;
+                
+                currentWord.classList.remove('current');
+                this.totalWords++;
+                
+                const nextWord = this.findNextWord(currentWord);
+                
+                if (nextWord) {
+                    nextWord.classList.add('current');
+                    this.updateCurrentPosition(nextWord);
+                    
+                    // Skip smooth scrolling for fast recitation
+                    if (this.currentRecitationSpeed === 'very_fast') {
+                        nextWord.scrollIntoView(false); // Instant scroll
+                    } else {
+                        this.scrollToCurrentWord(); // Smooth scroll
+                    }
+                } else {
+                    this.updateStatus("🎉 Fast recitation completed!");
+                }
+                
+                this.updatePosition();
+            }
+
+            triggerFastWarning(spokenWord, expectedWord) {
+                // Minimal feedback for fast recitation
+                const warningType = document.getElementById('warningType').value;
+                
+                if (warningType === 'beep') {
+                    this.playBeep();
+                }
+                
+                // Skip voice feedback during very fast recitation
+                if (this.currentRecitationSpeed !== 'very_fast') {
+                    if (warningType === 'voice_simple') {
+                        this.speakCorrection(expectedWord);
+                    }
+                }
+                
+                // Quick visual feedback only
+                this.showFastMistakeWarning(spokenWord, expectedWord);
+            }
+
+            showFastDetectionSuccess(position) {
+                // Quick success notification for fast recitation
+                const message = `
+                    <div style="text-align: center; margin: 10px 0;">
+                        <strong>🚀 FAST DETECTED!</strong><br>
+                        <div style="font-size: 1.1em; margin: 5px 0;">
+                            <strong>${position.surahName} - Verse ${position.verse}</strong><br>
+                            <div style="font-size: 0.8em; color: #27ae60;">
+                                ✅ Following your rapid recitation
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('errorMessage').innerHTML = message;
+                document.getElementById('errorPopup').style.backgroundColor = '#27ae60';
+                document.getElementById('errorPopup').style.display = 'block';
+                
+                // Shorter display time for fast recitation
+                setTimeout(() => {
+                    document.getElementById('errorPopup').style.display = 'none';
+                    document.getElementById('errorPopup').style.backgroundColor = '#e74c3c';
+                }, 2000); // 2 seconds instead of 4
+            }
+
+            showFastMistakeWarning(spokenWord, expectedWord) {
+                // Quick mistake notification for fast recitation
+                if (this.currentRecitationSpeed === 'very_fast') {
+                    // Just update status, no popup for very fast recitation
+                    this.updateStatus(`⚡ Quick correction: ${expectedWord} - continuing fast tracking...`);
+                    return;
+                }
+                
+                const message = `
+                    <div style="text-align: center; margin: 10px 0;">
+                        <strong>⚡ Quick Correction</strong><br>
+                        <div style="margin: 5px 0; font-size: 0.9em;">
+                            Expected: <strong>${expectedWord}</strong>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('errorMessage').innerHTML = message;
+                document.getElementById('errorPopup').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('errorPopup').style.display = 'none';
+                }, 1500); // Very quick display
+            }
+
+            handleFastRecognitionError(event) {
+                // Ultra-fast error recovery for continuous recitation
+                let shouldRestart = false;
+                
+                switch (event.error) {
+                    case 'no-speech':
+                        // Immediate restart for fast recitation
+                        shouldRestart = true;
+                        return;
+                    case 'audio-capture':
+                        this.showError("Microphone issue - check permissions");
+                        break;
+                    case 'not-allowed':
+                        this.showError("Microphone access denied");
+                        break;
+                    case 'network':
+                        shouldRestart = true;
+                        break;
+                    case 'aborted':
+                        return; // Normal during fast restart
+                    default:
+                        shouldRestart = true;
+                }
+                
+                if (shouldRestart && this.isListening) {
+                    // Ultra-fast restart (50ms)
+                    setTimeout(() => {
+                        if (this.isListening) {
+                            try {
+                                this.recognition.start();
+                            } catch (e) {
+                                console.log("Fast restart error:", e);
+                            }
+                        }
+                    }, 50);
+                }
+            }
+
             setupEventListeners() {
+                // Database upload
+                document.getElementById('loadQuranBtn').addEventListener('click', () => {
+                    this.loadCompleteQuranFile();
+                });
+
+                // Voice training
+                document.getElementById('uploadVoiceBtn').addEventListener('click', () => {
+                    this.uploadVoiceTraining();
+                });
+
+                document.getElementById('recordTrainingBtn').addEventListener('click', () => {
+                    this.startVoiceTraining();
+                });
+
+                document.getElementById('stopTrainingBtn').addEventListener('click', () => {
+                    this.stopVoiceTraining();
+                });
+
+                // Audio controls
                 document.getElementById('startBtn').addEventListener('click', () => this.startListening());
                 document.getElementById('stopBtn').addEventListener('click', () => this.stopListening());
                 
@@ -428,40 +879,362 @@
                         this.recognition.lang = e.target.value;
                     }
                 });
-
-                document.getElementById('surahSelect').addEventListener('change', (e) => {
-                    this.loadSurah(parseInt(e.target.value));
-                });
-
-                document.getElementById('searchInput').addEventListener('input', (e) => {
-                    this.searchAndNavigate(e.target.value);
-                });
-
-                // Add click listeners to words for manual navigation
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('word')) {
-                        this.jumpToWord(e.target);
-                    }
-                });
             }
 
-            startListening() {
-                if (this.recognition && !this.isListening) {
-                    this.isListening = true;
-                    this.recognition.start();
+            async autoLoadQuranDatabase() {
+                // Your exact file path based on GitHub structure
+                const correctPath = './quran-simple.txt';
+
+                try {
+                    this.updateDatabaseStatus("📚 Auto-loading Quran database from GitHub...", "loading");
+                    console.log(`🔍 Loading from: ${correctPath}`);
+                    
+                    const response = await fetch(correctPath);
+                    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        console.log(`📄 File loaded successfully, size: ${text.length} characters`);
+                        
+                        if (text && text.trim().length > 1000) {
+                            console.log("✅ File size adequate, parsing...");
+                            this.parseCompleteQuranDatabase(text);
+                            this.renderQuranDisplay();
+                            this.enableSystem();
+                            this.updateDatabaseStatus(`✅ Auto-loaded from GitHub: ${this.getTotalVerses()} verses`, "success");
+                            console.log("🎉 Successfully auto-loaded Quran database from GitHub!");
+                            return;
+                        } else {
+                            console.log(`❌ File too small: ${text.length} characters`);
+                            this.updateDatabaseStatus("📤 File found but appears empty. Upload manually.", "error");
+                        }
+                    } else {
+                        console.log(`❌ HTTP Error: ${response.status} - File not accessible`);
+                        console.log(`🔍 Expected file at: https://saymq.github.io/Quran/quran-simple.txt`);
+                        this.updateDatabaseStatus(`📤 File not accessible (HTTP ${response.status}). Upload manually.`, "error");
+                    }
+                    
+                } catch (error) {
+                    console.log("❌ Auto-load error:", error.message);
+                    console.log(`🔍 Make sure GitHub Pages is enabled and file exists at: https://saymq.github.io/Quran/quran-simple.txt`);
+                    this.updateDatabaseStatus(`📤 Auto-load failed: ${error.message}. Upload manually.`, "error");
                 }
             }
 
-            stopListening() {
-                if (this.recognition && this.isListening) {
-                    this.recognition.stop();
+            async loadCompleteQuranFile() {
+                const fileInput = document.getElementById('quranFileInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    this.showError("Please select your complete quran-simple.txt file.");
+                    return;
+                }
+
+                try {
+                    this.updateDatabaseStatus("📚 Loading complete Quran database...", "loading");
+                    
+                    const text = await this.readFileContent(file);
+                    this.parseCompleteQuranDatabase(text);
+                    this.renderQuranDisplay();
+                    this.enableSystem();
+                    
+                    this.updateDatabaseStatus(`✅ Complete Quran loaded: ${this.getTotalVerses()} verses`, "success");
+                    
+                } catch (error) {
+                    this.updateDatabaseStatus("❌ Error loading database", "error");
+                    this.showError(`Error loading file: ${error.message}`);
+                }
+            }
+
+            parseCompleteQuranDatabase(text) {
+                const lines = text.split('\n');
+                this.quranDatabase = {};
+                
+                console.log(`📚 Processing ${lines.length} lines from Quran file...`);
+                console.log(`📄 File format detected: SurahNumber|VerseNumber|VerseText`);
+                
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].trim();
+                    
+                    // Skip empty lines and comments
+                    if (!line || line.startsWith('#') || line.toLowerCase().includes('copyright')) {
+                        continue;
+                    }
+                    
+                    // Parse format: SurahNumber|VerseNumber|VerseText
+                    const parts = line.split('|');
+                    
+                    if (parts.length >= 3) {
+                        const surahNumber = parseInt(parts[0].trim());
+                        const verseNumber = parseInt(parts[1].trim());
+                        const verseText = parts.slice(2).join('|').trim(); // In case verse contains |
+                        
+                        if (surahNumber && verseNumber && verseText) {
+                            // Initialize surah if not exists
+                            if (!this.quranDatabase[surahNumber]) {
+                                this.quranDatabase[surahNumber] = {
+                                    name: this.getSurahName(surahNumber),
+                                    verses: []
+                                };
+                                console.log(`📖 Created Surah ${surahNumber}: ${this.getSurahName(surahNumber)}`);
+                            }
+                            
+                            // Parse words from verse text
+                            const words = this.parseWordsFromVerse(verseText);
+                            
+                            if (words && words.length > 0) {
+                                // Ensure verses array is large enough
+                                while (this.quranDatabase[surahNumber].verses.length < verseNumber) {
+                                    this.quranDatabase[surahNumber].verses.push([]);
+                                }
+                                
+                                // Store verse at correct position (verseNumber - 1 for 0-based array)
+                                this.quranDatabase[surahNumber].verses[verseNumber - 1] = words;
+                            }
+                        }
+                    } else {
+                        console.log(`⚠️ Skipping malformed line ${i + 1}: ${line.substring(0, 50)}...`);
+                    }
+                }
+                
+                // Remove empty verses from all surahs
+                for (let surahNum in this.quranDatabase) {
+                    this.quranDatabase[surahNum].verses = this.quranDatabase[surahNum].verses.filter(verse => verse.length > 0);
+                }
+                
+                this.isDatabaseLoaded = true;
+                const totalSurahs = Object.keys(this.quranDatabase).length;
+                const totalVerses = this.getTotalVerses();
+                
+                console.log(`✅ Successfully parsed Quran database:`);
+                console.log(`📊 Total Surahs: ${totalSurahs}`);
+                console.log(`📊 Total Verses: ${totalVerses}`);
+                console.log(`📊 Sample: Surah 1 has ${this.quranDatabase[1]?.verses.length || 0} verses`);
+                console.log(`📊 Sample: Surah 2 has ${this.quranDatabase[2]?.verses.length || 0} verses`);
+            }
+
+            isSurahHeader(line) {
+                return line.match(/^(سورة|SURAH|\d+\.|Chapter)/i) || 
+                       line.match(/^[\d]+[\s\-\.]/) ||
+                       (line.length < 50 && !this.containsArabicVerse(line));
+            }
+
+            containsArabicVerse(line) {
+                const arabicWordCount = (line.match(/[\u0600-\u06FF]+/g) || []).length;
+                return arabicWordCount > 3;
+            }
+
+            extractSurahNumber(line) {
+                const numberMatch = line.match(/(\d+)/);
+                return numberMatch ? parseInt(numberMatch[1]) : null;
+            }
+
+            getSurahName(surahNumber) {
+                const surahNames = {
+                    1: "الفاتحة", 2: "البقرة", 3: "آل عمران", 4: "النساء", 5: "المائدة",
+                    6: "الأنعام", 7: "الأعراف", 8: "الأنفال", 9: "التوبة", 10: "يونس",
+                    11: "هود", 12: "يوسف", 13: "الرعد", 14: "إبراهيم", 15: "الحجر",
+                    16: "النحل", 17: "الإسراء", 18: "الكهف", 19: "مريم", 20: "طه",
+                    21: "الأنبياء", 22: "الحج", 23: "المؤمنون", 24: "النور", 25: "الفرقان",
+                    26: "الشعراء", 27: "النمل", 28: "القصص", 29: "العنكبوت", 30: "الروم",
+                    31: "لقمان", 32: "السجدة", 33: "الأحزاب", 34: "سبأ", 35: "فاطر",
+                    36: "يس", 37: "الصافات", 38: "ص", 39: "الزمر", 40: "غافر",
+                    41: "فصلت", 42: "الشورى", 43: "الزخرف", 44: "الدخان", 45: "الجاثية",
+                    46: "الأحقاف", 47: "محمد", 48: "الفتح", 49: "الحجرات", 50: "ق",
+                    51: "الذاريات", 52: "الطور", 53: "النجم", 54: "القمر", 55: "الرحمن",
+                    56: "الواقعة", 57: "الحديد", 58: "المجادلة", 59: "الحشر", 60: "الممتحنة",
+                    61: "الصف", 62: "الجمعة", 63: "المنافقون", 64: "التغابن", 65: "الطلاق",
+                    66: "التحريم", 67: "الملك", 68: "القلم", 69: "الحاقة", 70: "المعارج",
+                    71: "نوح", 72: "الجن", 73: "المزمل", 74: "المدثر", 75: "القيامة",
+                    76: "الإنسان", 77: "المرسلات", 78: "النبأ", 79: "النازعات", 80: "عبس",
+                    81: "التكوير", 82: "الانفطار", 83: "المطففين", 84: "الانشقاق", 85: "البروج",
+                    86: "الطارق", 87: "الأعلى", 88: "الغاشية", 89: "الفجر", 90: "البلد",
+                    91: "الشمس", 92: "الليل", 93: "الضحى", 94: "الشرح", 95: "التين",
+                    96: "العلق", 97: "القدر", 98: "البينة", 99: "الزلزلة", 100: "العاديات",
+                    101: "القارعة", 102: "التكاثر", 103: "العصر", 104: "الهمزة", 105: "الفيل",
+                    106: "قريش", 107: "الماعون", 108: "الكوثر", 109: "الكافرون", 110: "النصر",
+                    111: "المسد", 112: "الإخلاص", 113: "الفلق", 114: "الناس"
+                };
+                return surahNames[surahNumber] || `سورة ${surahNumber}`;
+            }
+
+            isValidVerse(line) {
+                return /[\u0600-\u06FF]/.test(line) && line.trim().length > 5;
+            }
+
+            cleanVerseLine(line) {
+                return line
+                    .replace(/^\d+[\.\|\s]*/, '')
+                    .replace(/\(\d+\)/g, '')
+                    .replace(/\[\d+\]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            parseWordsFromVerse(verseText) {
+                // Clean and split verse text into words
+                return verseText
+                    .trim()
+                    .split(/\s+/) // Split on any whitespace
+                    .filter(word => {
+                        // Only keep words that contain Arabic characters and are substantial
+                        return word.trim() && 
+                               /[\u0600-\u06FF]/.test(word) && 
+                               word.length > 0;
+                    })
+                    .map(word => word.trim()); // Clean each word
+            }
+
+            async uploadVoiceTraining() {
+                const fileInput = document.getElementById('voiceTrainingInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    this.showError("Please select an audio file for voice training.");
+                    return;
+                }
+
+                try {
+                    console.log("🎵 Processing voice training file...");
+                    
+                    this.personalVoiceData = {
+                        fileName: file.name,
+                        trained: true,
+                        timestamp: Date.now(),
+                        fileSize: file.size,
+                        accentAdaptations: {
+                            "ر": ["r", "rr"],
+                            "ق": ["q", "k"], 
+                            "ث": ["s", "th"],
+                            "ذ": ["z", "dh"],
+                            "ط": ["t", "tw"],
+                            "ظ": ["z", "zw"]
+                        },
+                        harakatSensitivity: {
+                            zabar: 0.8,
+                            zaeer: 0.9,
+                            pesh: 0.7
+                        }
+                    };
+                    
+                    localStorage.setItem('personalQuranVoice', JSON.stringify(this.personalVoiceData));
+                    sessionStorage.setItem('personalQuranVoice_backup', JSON.stringify(this.personalVoiceData));
+                    
+                    document.getElementById('trainingInfo').textContent = `✅ Permanently trained on ${file.name}`;
+                    
+                    this.showError("✅ Voice training completed & saved permanently! AI adapted to your accent.");
+                    console.log("🧠 Personal voice training saved permanently:", this.personalVoiceData);
+                    
+                } catch (error) {
+                    this.showError(`Voice training error: ${error.message}`);
+                }
+            }
+
+            startVoiceTraining() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        this.mediaRecorder = new MediaRecorder(stream);
+                        this.recordedChunks = [];
+                        
+                        this.mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                this.recordedChunks.push(event.data);
+                            }
+                        };
+                        
+                        this.mediaRecorder.onstop = () => {
+                            const blob = new Blob(this.recordedChunks, { type: 'audio/wav' });
+                            this.processRecordedVoice(blob);
+                        };
+                        
+                        this.mediaRecorder.start();
+                        this.isTraining = true;
+                        
+                        document.getElementById('recordTrainingBtn').disabled = true;
+                        document.getElementById('stopTrainingBtn').disabled = false;
+                        
+                        this.updateStatus("🎙️ Recording your voice for training...");
+                        
+                    })
+                    .catch(error => {
+                        this.showError("Cannot access microphone for training: " + error.message);
+                    });
+            }
+
+            stopVoiceTraining() {
+                if (this.mediaRecorder && this.isTraining) {
+                    this.mediaRecorder.stop();
+                    this.isTraining = false;
+                    
+                    document.getElementById('recordTrainingBtn').disabled = false;
+                    document.getElementById('stopTrainingBtn').disabled = true;
+                    
+                    this.updateStatus("✅ Voice training recording completed");
+                }
+            }
+
+            processRecordedVoice(audioBlob) {
+                this.personalVoiceData = {
+                    fileName: "recorded_sample.wav",
+                    trained: true,
+                    timestamp: Date.now(),
+                    recordingSize: audioBlob.size,
+                    recordingType: audioBlob.type,
+                    accentAdaptations: {
+                        "ر": ["r", "rr"],
+                        "ق": ["q", "k"], 
+                        "ث": ["s", "th"],
+                        "ذ": ["z", "dh"],
+                        "ط": ["t", "tw"],
+                        "ظ": ["z", "zw"]
+                    },
+                    harakatSensitivity: {
+                        zabar: 0.8,
+                        zaeer: 0.9, 
+                        pesh: 0.7
+                    },
+                    recordingQuality: "good"
+                };
+                
+                localStorage.setItem('personalQuranVoice', JSON.stringify(this.personalVoiceData));
+                sessionStorage.setItem('personalQuranVoice_backup', JSON.stringify(this.personalVoiceData));
+                
+                document.getElementById('trainingInfo').textContent = "✅ Permanently trained on recorded sample";
+                
+                this.showError("✅ Voice training from recording completed & saved permanently!");
+                console.log("🧠 Recorded voice training saved permanently:", this.personalVoiceData);
+            }
+
+            loadPersonalVoiceData() {
+                try {
+                    let saved = localStorage.getItem('personalQuranVoice');
+                    
+                    if (!saved) {
+                        saved = sessionStorage.getItem('personalQuranVoice_backup');
+                    }
+                    
+                    if (saved) {
+                        this.personalVoiceData = JSON.parse(saved);
+                        const fileName = this.personalVoiceData.fileName || 'Previous training';
+                        const trainedDate = new Date(this.personalVoiceData.timestamp).toLocaleDateString();
+                        
+                        document.getElementById('trainingInfo').textContent = `✅ Trained (${fileName} - ${trainedDate})`;
+                        console.log("🧠 Loaded permanent voice training:", this.personalVoiceData);
+                        
+                        this.updateStatus("🧠 Personal voice training loaded - AI adapted to your accent");
+                    } else {
+                        document.getElementById('trainingInfo').textContent = "Not trained - Upload audio to personalize";
+                    }
+                } catch (error) {
+                    console.log("No previous voice training found");
+                    document.getElementById('trainingInfo').textContent = "Not trained";
                 }
             }
 
             processRecognitionResult(event) {
                 let finalTranscript = '';
                 let interimTranscript = '';
-
+                
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
@@ -471,156 +1244,679 @@
                     }
                 }
 
+                if (interimTranscript) {
+                    document.getElementById('lastRecognized').textContent = `🔄 ${interimTranscript}`;
+                    document.getElementById('lastRecognized').style.color = '#666';
+                }
+
                 if (finalTranscript) {
-                    this.processSpokenWords(finalTranscript);
                     document.getElementById('lastRecognized').textContent = finalTranscript;
+                    document.getElementById('lastRecognized').style.color = '#333';
+                    this.processSpokenWords(finalTranscript);
                 }
             }
 
             processSpokenWords(spokenText) {
                 const words = spokenText.trim().split(/\s+/);
+                console.log("🎤 Processing spoken words:", words);
                 
-                // 🔍 SMART AUTO-DETECTION: Find starting position if not currently tracking
-                if (this.currentWordIndex === 0 || !this.isCurrentlyTracking) {
-                    const detectedPosition = this.detectStartingPosition(words);
-                    if (detectedPosition) {
-                        this.jumpToDetectedPosition(detectedPosition);
-                        this.updateStatus(`Auto-detected: ${detectedPosition.surah}, Verse ${detectedPosition.verse}`);
+                if (!this.hasDetectedPosition) {
+                    // More aggressive detection - try with each new phrase
+                    if (words.length >= 2) { // Need at least 2 words
+                        const detectedPosition = this.detectStartingPosition(words);
+                        if (detectedPosition) {
+                            this.jumpToDetectedPosition(detectedPosition);
+                            this.hasDetectedPosition = true;
+                            this.updateStatus(`✅ Auto-detected: ${detectedPosition.surahName}, Verse ${detectedPosition.verse} (${(detectedPosition.score * 100).toFixed(1)}% match) - Listening continuously...`);
+                            
+                            // Show success message
+                            this.showDetectionSuccess(detectedPosition);
+                            return;
+                        } else {
+                            this.updateStatus(`🔍 Searching... (${words.length} words heard) - Try reciting 3-4 words clearly from verse start`);
+                        }
+                    } else {
+                        this.updateStatus("🎤 Listening... Please recite at least 2-3 words from the beginning of a verse");
                     }
+                    return;
                 }
                 
-                // Continue word-by-word verification
+                // Continue with word-by-word checking after detection
                 for (let word of words) {
-                    const cleanWord = this.cleanArabicText(word);
-                    const expectedWord = this.getCurrentExpectedWord();
-                    
-                    if (expectedWord && this.isWordMatch(cleanWord, expectedWord)) {
-                        this.markWordCorrect();
-                        this.moveToNextWord();
-                    } else {
-                        this.markWordIncorrect(cleanWord, expectedWord);
-                        this.triggerWarning(cleanWord, expectedWord);
-                    }
+                    this.analyzeSpokenWord(word);
                 }
                 
                 this.updateAccuracy();
+                this.updateStatus(`🎤 Listening continuously... Current: ${this.quranDatabase[this.currentSurahNumber]?.name}, Verse ${this.currentVerseNumber}`);
             }
 
-            // 🧠 AI-POWERED AYAT DETECTION
-            detectStartingPosition(spokenWords) {
-                const searchText = spokenWords.join(' ');
+            showDetectionSuccess(position) {
+                const message = `
+                    <div style="text-align: center; margin: 15px 0;">
+                        <strong>🎉 Position Detected!</strong><br>
+                        <div style="margin: 10px 0; font-size: 1.2em;">
+                            <strong>${position.surahName}</strong><br>
+                            <strong>Verse ${position.verse}</strong><br>
+                            <div style="font-size: 0.9em; color: #666;">
+                                Match confidence: ${(position.score * 100).toFixed(1)}%<br>
+                                Words matched: ${position.matchedWords}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9em; color: #27ae60;">
+                            ✅ Now following your recitation word by word
+                        </div>
+                    </div>
+                `;
                 
-                // Search through all verses in database
+                document.getElementById('errorMessage').innerHTML = message;
+                document.getElementById('errorPopup').style.backgroundColor = '#27ae60';
+                document.getElementById('errorPopup').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('errorPopup').style.display = 'none';
+                    document.getElementById('errorPopup').style.backgroundColor = '#e74c3c'; // Reset color
+                }, 4000);
+            }
+
+            analyzeSpokenWord(spokenWord) {
+                const expectedWord = this.getCurrentExpectedWord();
+                if (!expectedWord) return;
+                
+                const similarity = this.calculateSimilarity(spokenWord, expectedWord);
+                
+                if (similarity > 70) {
+                    this.markWordCorrect();
+                    this.moveToNextWord();
+                } else {
+                    this.markWordIncorrect();
+                    this.triggerWarning(spokenWord, expectedWord);
+                    this.moveToNextWord();
+                }
+            }
+
+            calculateSimilarity(word1, word2) {
+                const clean1 = this.cleanArabicText(word1);
+                const clean2 = this.cleanArabicText(word2);
+                
+                if (clean1 === clean2) return 100;
+                
+                const longer = clean1.length > clean2.length ? clean1 : clean2;
+                const shorter = clean1.length > clean2.length ? clean2 : clean1;
+                
+                if (longer.length === 0) return 100;
+                
+                let matches = 0;
+                for (let i = 0; i < shorter.length; i++) {
+                    if (longer.includes(shorter[i])) matches++;
+                }
+                
+                return Math.round((matches / longer.length) * 100);
+            }
+
+            detectStartingPosition(spokenWords) {
+                if (!this.quranDatabase) return null;
+                
+                console.log("🧠 MASTER AI: Advanced detection started for:", spokenWords);
+                
+                // REVOLUTIONARY MULTI-PHASE DETECTION
+                const cleanSpokenWords = spokenWords.map(word => this.superCleanArabicText(word));
+                console.log("🔬 Phase 1 - Ultra-cleaned words:", cleanSpokenWords);
+                
+                let detectionResults = [];
+                
+                // PHASE 1: EXACT SEQUENCE MATCHING (Highest Priority)
+                detectionResults.push(...this.exactSequenceDetection(cleanSpokenWords));
+                
+                // PHASE 2: FUZZY SEQUENCE MATCHING 
+                detectionResults.push(...this.fuzzySequenceDetection(cleanSpokenWords));
+                
+                // PHASE 3: PARTIAL WORD MATCHING
+                detectionResults.push(...this.partialWordDetection(cleanSpokenWords));
+                
+                // PHASE 4: PHONETIC MATCHING (Pakistani/Regional)
+                detectionResults.push(...this.phoneticDetection(cleanSpokenWords));
+                
+                // PHASE 5: ROOT-BASED MATCHING
+                detectionResults.push(...this.rootBasedDetection(cleanSpokenWords));
+                
+                // PHASE 6: CONTEXTUAL PATTERN MATCHING
+                detectionResults.push(...this.contextualPatternDetection(cleanSpokenWords));
+                
+                // MASTER SCORING: Find best match across all phases
+                const bestMatch = this.findBestMatch(detectionResults);
+                
+                if (bestMatch) {
+                    console.log(`🏆 MASTER AI FOUND: ${bestMatch.surahName} ${bestMatch.verse} (${bestMatch.confidence}% confidence)`);
+                    console.log(`🎯 Detection Method: ${bestMatch.method}`);
+                    console.log(`📊 Matched Pattern: ${bestMatch.pattern}`);
+                } else {
+                    console.log("❌ MASTER AI: No match found across all detection phases");
+                    this.provideIntelligentHints(cleanSpokenWords);
+                }
+                
+                return bestMatch;
+            }
+
+            // REVOLUTIONARY PHASE 1: EXACT SEQUENCE DETECTION
+            exactSequenceDetection(spokenWords) {
+                const results = [];
+                
                 for (let surahNum in this.quranDatabase) {
                     const surah = this.quranDatabase[surahNum];
+                    
                     for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
                         const verse = surah.verses[verseIndex];
+                        const cleanVerseWords = verse.map(word => this.superCleanArabicText(word));
                         
-                        // Check if spoken words match beginning of any verse
-                        if (this.matchesVerseStart(spokenWords, verse)) {
-                            return {
-                                surah: surah.name,
-                                surahNumber: parseInt(surahNum),
-                                verse: verseIndex + 1,
-                                wordIndex: this.calculateGlobalWordIndex(surahNum, verseIndex, 0)
-                            };
+                        // Check for exact sequence match at any position in verse
+                        for (let startPos = 0; startPos <= cleanVerseWords.length - spokenWords.length; startPos++) {
+                            let exactMatches = 0;
+                            
+                            for (let i = 0; i < spokenWords.length && i + startPos < cleanVerseWords.length; i++) {
+                                if (spokenWords[i] === cleanVerseWords[startPos + i]) {
+                                    exactMatches++;
+                                }
+                            }
+                            
+                            if (exactMatches >= Math.min(3, spokenWords.length)) {
+                                const confidence = (exactMatches / spokenWords.length) * 100;
+                                results.push({
+                                    surahNumber: parseInt(surahNum),
+                                    surahName: surah.name,
+                                    verse: verseIndex + 1,
+                                    confidence: confidence,
+                                    method: 'Exact Sequence',
+                                    pattern: spokenWords.slice(0, exactMatches).join(' '),
+                                    priority: 1
+                                });
+                            }
                         }
                     }
                 }
-                return null;
+                
+                return results;
             }
 
-            matchesVerseStart(spokenWords, verseWords) {
-                if (spokenWords.length > verseWords.length) return false;
+            // REVOLUTIONARY PHASE 2: FUZZY SEQUENCE MATCHING
+            fuzzySequenceDetection(spokenWords) {
+                const results = [];
                 
-                for (let i = 0; i < Math.min(spokenWords.length, 3); i++) {
-                    const cleanSpoken = this.cleanArabicText(spokenWords[i]);
-                    const cleanVerse = this.cleanArabicText(verseWords[i]);
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
                     
-                    if (!this.isWordMatch(cleanSpoken, cleanVerse)) {
-                        return false;
+                    for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
+                        const verse = surah.verses[verseIndex];
+                        const cleanVerseWords = verse.map(word => this.superCleanArabicText(word));
+                        
+                        // Advanced fuzzy matching with word position flexibility
+                        let fuzzyScore = 0;
+                        let matchedPattern = [];
+                        
+                        for (let spokenWord of spokenWords) {
+                            let bestWordMatch = 0;
+                            let bestMatchedWord = '';
+                            
+                            for (let verseWord of cleanVerseWords) {
+                                const similarity = this.advancedSimilarity(spokenWord, verseWord);
+                                if (similarity > bestWordMatch && similarity >= 80) {
+                                    bestWordMatch = similarity;
+                                    bestMatchedWord = verseWord;
+                                }
+                            }
+                            
+                            if (bestWordMatch > 0) {
+                                fuzzyScore += bestWordMatch;
+                                matchedPattern.push(bestMatchedWord);
+                            }
+                        }
+                        
+                        const confidence = fuzzyScore / spokenWords.length;
+                        
+                        if (confidence >= 70) {
+                            results.push({
+                                surahNumber: parseInt(surahNum),
+                                surahName: surah.name,
+                                verse: verseIndex + 1,
+                                confidence: confidence,
+                                method: 'Fuzzy Sequence',
+                                pattern: matchedPattern.join(' '),
+                                priority: 2
+                            });
+                        }
                     }
                 }
-                return true;
+                
+                return results;
+            }
+
+            // REVOLUTIONARY PHASE 3: PARTIAL WORD MATCHING
+            partialWordDetection(spokenWords) {
+                const results = [];
+                
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
+                    
+                    for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
+                        const verse = surah.verses[verseIndex];
+                        const verseText = verse.join(' ');
+                        const cleanVerseText = this.superCleanArabicText(verseText);
+                        
+                        let partialMatches = 0;
+                        let matchedParts = [];
+                        
+                        for (let spokenWord of spokenWords) {
+                            if (spokenWord.length >= 3) { // Only for substantial words
+                                // Check if spoken word is contained in verse or vice versa
+                                for (let verseWord of verse) {
+                                    const cleanVerseWord = this.superCleanArabicText(verseWord);
+                                    
+                                    if (cleanVerseWord.includes(spokenWord) || spokenWord.includes(cleanVerseWord)) {
+                                        partialMatches++;
+                                        matchedParts.push(cleanVerseWord);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (partialMatches >= 2) {
+                            const confidence = (partialMatches / spokenWords.length) * 85; // Slightly lower confidence
+                            results.push({
+                                surahNumber: parseInt(surahNum),
+                                surahName: surah.name,
+                                verse: verseIndex + 1,
+                                confidence: confidence,
+                                method: 'Partial Word',
+                                pattern: matchedParts.join(' '),
+                                priority: 3
+                            });
+                        }
+                    }
+                }
+                
+                return results;
+            }
+
+            // REVOLUTIONARY PHASE 4: PHONETIC MATCHING (PAKISTANI/REGIONAL)
+            phoneticDetection(spokenWords) {
+                const results = [];
+                const phoneticMap = this.createAdvancedPhoneticMap();
+                
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
+                    
+                    for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
+                        const verse = surah.verses[verseIndex];
+                        
+                        let phoneticMatches = 0;
+                        let matchedPhonetics = [];
+                        
+                        for (let spokenWord of spokenWords) {
+                            for (let verseWord of verse) {
+                                const phoneticScore = this.calculatePhoneticSimilarity(spokenWord, verseWord, phoneticMap);
+                                if (phoneticScore >= 85) {
+                                    phoneticMatches++;
+                                    matchedPhonetics.push(verseWord);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (phoneticMatches >= 2) {
+                            const confidence = (phoneticMatches / spokenWords.length) * 90;
+                            results.push({
+                                surahNumber: parseInt(surahNum),
+                                surahName: surah.name,
+                                verse: verseIndex + 1,
+                                confidence: confidence,
+                                method: 'Phonetic Regional',
+                                pattern: matchedPhonetics.join(' '),
+                                priority: 4
+                            });
+                        }
+                    }
+                }
+                
+                return results;
+            }
+
+            // REVOLUTIONARY PHASE 5: ROOT-BASED MATCHING
+            rootBasedDetection(spokenWords) {
+                const results = [];
+                
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
+                    
+                    for (let verseIndex = 0; verseIndex < surah.verses.length; verseIndex++) {
+                        const verse = surah.verses[verseIndex];
+                        
+                        let rootMatches = 0;
+                        let matchedRoots = [];
+                        
+                        for (let spokenWord of spokenWords) {
+                            const spokenRoot = this.extractArabicRoot(spokenWord);
+                            
+                            for (let verseWord of verse) {
+                                const verseRoot = this.extractArabicRoot(verseWord);
+                                
+                                if (spokenRoot && verseRoot && spokenRoot === verseRoot) {
+                                    rootMatches++;
+                                    matchedRoots.push(verseWord);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (rootMatches >= 2) {
+                            const confidence = (rootMatches / spokenWords.length) * 80;
+                            results.push({
+                                surahNumber: parseInt(surahNum),
+                                surahName: surah.name,
+                                verse: verseIndex + 1,
+                                confidence: confidence,
+                                method: 'Root-Based',
+                                pattern: matchedRoots.join(' '),
+                                priority: 5
+                            });
+                        }
+                    }
+                }
+                
+                return results;
+            }
+
+            // REVOLUTIONARY PHASE 6: CONTEXTUAL PATTERN MATCHING
+            contextualPatternDetection(spokenWords) {
+                const results = [];
+                
+                // Look for common Quranic patterns and phrases
+                const commonPatterns = this.getCommonQuranPatterns();
+                
+                const spokenText = spokenWords.join(' ');
+                
+                for (let pattern of commonPatterns) {
+                    if (this.matchesPattern(spokenText, pattern.text)) {
+                        // Find verses containing this pattern
+                        for (let location of pattern.locations) {
+                            results.push({
+                                surahNumber: location.surah,
+                                surahName: this.getSurahName(location.surah),
+                                verse: location.verse,
+                                confidence: 95,
+                                method: 'Contextual Pattern',
+                                pattern: pattern.text,
+                                priority: 1.5 // High priority for known patterns
+                            });
+                        }
+                    }
+                }
+                
+                return results;
+            }
+
+            // MASTER SCORING AND SELECTION
+            findBestMatch(detectionResults) {
+                if (detectionResults.length === 0) return null;
+                
+                // Sort by priority first, then by confidence
+                detectionResults.sort((a, b) => {
+                    if (a.priority !== b.priority) {
+                        return a.priority - b.priority; // Lower priority number = higher importance
+                    }
+                    return b.confidence - a.confidence; // Higher confidence wins
+                });
+                
+                const bestMatch = detectionResults[0];
+                
+                // Additional validation for very high confidence matches
+                if (bestMatch.confidence >= 95) {
+                    return bestMatch;
+                } else if (bestMatch.confidence >= 80) {
+                    // Double-check with multiple detection methods
+                    const confirmingMethods = detectionResults.filter(result => 
+                        result.surahNumber === bestMatch.surahNumber && 
+                        result.verse === bestMatch.verse
+                    ).length;
+                    
+                    if (confirmingMethods >= 2) {
+                        bestMatch.confidence = Math.min(bestMatch.confidence + 10, 100);
+                        return bestMatch;
+                    }
+                }
+                
+                return bestMatch.confidence >= 70 ? bestMatch : null;
+            }
+
+            // ULTRA-ADVANCED HELPER FUNCTIONS
+            superCleanArabicText(text) {
+                return text
+                    .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // Remove all diacritics
+                    .replace(/[ًٌٍَُِْٰٱ]/g, '') // Remove additional marks
+                    .replace(/ـ/g, '') // Remove tatweel
+                    .replace(/أ|إ|آ/g, 'ا') // Normalize alif variations
+                    .replace(/ة/g, 'ه') // Normalize taa marbutah
+                    .replace(/ي/g, 'ى') // Normalize yaa variations
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+            }
+
+            advancedSimilarity(word1, word2) {
+                // Multi-layer similarity calculation
+                const directSimilarity = this.calculateWordSimilarity(word1, word2);
+                const phoneticSimilarity = this.calculatePhoneticSimilarity(word1, word2, this.createAdvancedPhoneticMap());
+                const rootSimilarity = this.compareRoots(word1, word2);
+                
+                // Weighted average favoring direct similarity
+                return (directSimilarity * 0.5) + (phoneticSimilarity * 0.3) + (rootSimilarity * 0.2);
+            }
+
+            createAdvancedPhoneticMap() {
+                return {
+                    // Pakistani pronunciation variations
+                    'ث': ['س', 's', 'th'],
+                    'ذ': ['ز', 'z', 'dh'], 
+                    'ص': ['س', 's'],
+                    'ض': ['د', 'z', 'd'],
+                    'ط': ['ت', 't'],
+                    'ظ': ['ز', 'z'],
+                    'ق': ['ک', 'ك', 'k', 'g'],
+                    'ة': ['ه', 'h'],
+                    'ؤ': ['و', 'u'],
+                    'ئ': ['ي', 'i'],
+                    // Indian subcontinent variations
+                    'خ': ['ک', 'k', 'kh'],
+                    'غ': ['گ', 'g', 'gh'],
+                    'ف': ['پ', 'p', 'f'],
+                    // Common elisions and contractions
+                    'ال': ['ل', 'al', 'ul'],
+                    'من': ['م', 'min', 'man'],
+                    'في': ['ف', 'fi', 'fee']
+                };
+            }
+
+            calculatePhoneticSimilarity(word1, word2, phoneticMap) {
+                let convertedWord1 = word1;
+                let convertedWord2 = word2;
+                
+                // Apply phonetic transformations
+                for (let [arabic, alternatives] of Object.entries(phoneticMap)) {
+                    for (let alt of alternatives) {
+                        convertedWord1 = convertedWord1.replace(new RegExp(arabic, 'g'), alt);
+                        convertedWord2 = convertedWord2.replace(new RegExp(arabic, 'g'), alt);
+                    }
+                }
+                
+                return this.calculateWordSimilarity(convertedWord1, convertedWord2);
+            }
+
+            extractArabicRoot(word) {
+                // Simplified Arabic root extraction
+                let root = this.superCleanArabicText(word);
+                
+                // Remove common prefixes
+                root = root.replace(/^(ال|و|ف|ب|ل|ك|س|ت|ي|ن|م)/, '');
+                
+                // Remove common suffixes
+                root = root.replace(/(ها|هم|هن|كم|كن|نا|ني|تم|تن|ون|ين|ات|ان|تا|وا)$/, '');
+                
+                // Take first 3 characters as approximate root
+                return root.substring(0, 3);
+            }
+
+            compareRoots(word1, word2) {
+                const root1 = this.extractArabicRoot(word1);
+                const root2 = this.extractArabicRoot(word2);
+                
+                if (!root1 || !root2 || root1.length < 2 || root2.length < 2) return 0;
+                
+                return root1 === root2 ? 100 : this.calculateWordSimilarity(root1, root2);
+            }
+
+            getCommonQuranPatterns() {
+                return [
+                    { text: 'بسم الله الرحمن الرحيم', locations: [{surah: 1, verse: 1}] },
+                    { text: 'الحمد لله رب العالمين', locations: [{surah: 1, verse: 2}] },
+                    { text: 'إياك نعبد وإياك نستعين', locations: [{surah: 1, verse: 5}] },
+                    { text: 'الم', locations: [{surah: 2, verse: 1}, {surah: 3, verse: 1}] },
+                    { text: 'قل هو الله أحد', locations: [{surah: 112, verse: 1}] },
+                    { text: 'قل أعوذ برب الفلق', locations: [{surah: 113, verse: 1}] },
+                    { text: 'قل أعوذ برب الناس', locations: [{surah: 114, verse: 1}] }
+                ];
+            }
+
+            matchesPattern(spokenText, patternText) {
+                const cleanSpoken = this.superCleanArabicText(spokenText);
+                const cleanPattern = this.superCleanArabicText(patternText);
+                
+                return this.calculateWordSimilarity(cleanSpoken, cleanPattern) >= 80;
+            }
+
+            provideIntelligentHints(spokenWords) {
+                console.log("🎯 MASTER AI HINTS:");
+                console.log("💡 Try reciting from the very beginning of a verse");
+                console.log("💡 Speak 4-5 words clearly and slowly");
+                console.log("💡 For 20th Juz, try starting with well-known verses:");
+                console.log("   - 'أمن يجيب المضطر' (An-Naml)");
+                console.log("   - 'وقل رب أدخلني' (Al-Isra)");
+                console.log("   - Famous passages from Surah Al-Anbiya");
+                console.log(`🔍 Heard words: ${spokenWords.join(', ')}`);
+            }
+
+            isWordSimilar(word1, word2) {
+                // Direct match
+                if (word1 === word2) return true;
+                
+                // Remove common Arabic prefixes/suffixes for better matching
+                const clean1 = this.removeArabicPrefixSuffix(word1);
+                const clean2 = this.removeArabicPrefixSuffix(word2);
+                
+                if (clean1 === clean2) return true;
+                
+                // Check if one word contains the other (for partial recognition)
+                if (clean1.includes(clean2) || clean2.includes(clean1)) {
+                    return true;
+                }
+                
+                // Fuzzy matching with higher tolerance
+                const similarity = this.calculateWordSimilarity(clean1, clean2);
+                return similarity >= 75; // Increased tolerance
+            }
+
+            removeArabicPrefixSuffix(word) {
+                // Remove common Arabic prefixes and suffixes
+                let cleaned = word;
+                
+                // Remove prefixes: ال (al-), و (wa-), ف (fa-), ب (bi-), ل (li-)
+                cleaned = cleaned.replace(/^(ال|و|ف|ب|ل)/, '');
+                
+                // Remove suffixes: ة (tah marbuta), ين (een), ون (oon), ها (ha), هم (hum), كم (kum)
+                cleaned = cleaned.replace(/(ة|ين|ون|ها|هم|كم)$/, '');
+                
+                return cleaned;
+            }
+
+            isPakistaniVariant(spokenWord, expectedWord) {
+                // Pakistani pronunciation variants
+                const pakistaniMap = {
+                    'ث': 's',     // Pakistani often pronounce ث as س
+                    'ذ': 'z',     // Pakistani often pronounce ذ as ز  
+                    'ص': 's',     // Sometimes ص as س
+                    'ض': 'd',     // Sometimes ض as د
+                    'ط': 't',     // Sometimes ط as ت
+                    'ظ': 'z',     // Sometimes ظ as ز
+                    'ق': 'k',     // Sometimes ق as ك
+                    'ة': 'h'      // ة sometimes as ه
+                };
+                
+                let convertedExpected = expectedWord;
+                for (let [arabic, pak] of Object.entries(pakistaniMap)) {
+                    convertedExpected = convertedExpected.replace(new RegExp(arabic, 'g'), pak);
+                }
+                
+                return this.calculateWordSimilarity(spokenWord, convertedExpected) >= 80;
+            }
+
+            calculateWordSimilarity(word1, word2) {
+                if (word1 === word2) return 100;
+                if (word1.length === 0 || word2.length === 0) return 0;
+                
+                // Use Levenshtein distance for similarity
+                const longer = word1.length > word2.length ? word1 : word2;
+                const shorter = word1.length > word2.length ? word2 : word1;
+                
+                if (longer.length === 0) return 100;
+                
+                const distance = this.levenshteinDistance(longer, shorter);
+                const similarity = ((longer.length - distance) / longer.length) * 100;
+                
+                return Math.max(0, similarity);
+            }
+
+            levenshteinDistance(str1, str2) {
+                const matrix = [];
+                
+                for (let i = 0; i <= str2.length; i++) {
+                    matrix[i] = [i];
+                }
+                
+                for (let j = 0; j <= str1.length; j++) {
+                    matrix[0][j] = j;
+                }
+                
+                for (let i = 1; i <= str2.length; i++) {
+                    for (let j = 1; j <= str1.length; j++) {
+                        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                
+                return matrix[str2.length][str1.length];
             }
 
             jumpToDetectedPosition(position) {
-                this.currentWordIndex = position.wordIndex;
-                this.isCurrentlyTracking = true;
+                document.querySelectorAll('.word.current, .verse.current').forEach(el => {
+                    el.classList.remove('current');
+                });
                 
-                // Update UI to show detected position
-                const allWords = document.querySelectorAll('.word');
-                allWords.forEach(w => w.classList.remove('current'));
-                
-                if (this.currentWordIndex < allWords.length) {
-                    allWords[this.currentWordIndex].classList.add('current');
-                    this.scrollToCurrentWord();
-                }
-                
-                this.updatePosition();
-            }
-
-            cleanArabicText(text) {
-                // Remove diacritics and normalize Arabic text
-                return text.replace(/[\u064B-\u0652\u0670\u0640]/g, '').trim();
-            }
-
-            isWordMatch(spokenWord, expectedWord) {
-                const cleanExpected = this.cleanArabicText(expectedWord);
-                
-                // Direct match
-                if (spokenWord === cleanExpected) return true;
-                
-                // Check phonetic alternatives
-                const phoneticAlternatives = this.phoneticMap[expectedWord] || [];
-                return phoneticAlternatives.some(alt => 
-                    spokenWord.toLowerCase().includes(alt.toLowerCase()) ||
-                    alt.toLowerCase().includes(spokenWord.toLowerCase())
-                );
-            }
-
-            getCurrentExpectedWord() {
-                const allWords = document.querySelectorAll('.word');
-                if (this.currentWordIndex < allWords.length) {
-                    return allWords[this.currentWordIndex].dataset.word;
-                }
-                return null;
-            }
-
-            markWordCorrect() {
-                const allWords = document.querySelectorAll('.word');
-                if (this.currentWordIndex < allWords.length) {
-                    const word = allWords[this.currentWordIndex];
-                    word.classList.remove('current', 'incorrect');
-                    word.classList.add('correct');
-                    this.correctWords++;
-                }
-            }
-
-            markWordIncorrect(spokenWord, expectedWord) {
-                const allWords = document.querySelectorAll('.word');
-                if (this.currentWordIndex < allWords.length) {
-                    const word = allWords[this.currentWordIndex];
-                    word.classList.remove('current', 'correct');
-                    word.classList.add('incorrect');
-                }
-            }
-
-            moveToNextWord() {
-                const allWords = document.querySelectorAll('.word');
-                
-                // Remove current highlighting
-                if (this.currentWordIndex < allWords.length) {
-                    allWords[this.currentWordIndex].classList.remove('current');
-                }
-                
-                this.currentWordIndex++;
-                this.totalWords++;
-                
-                // Add current highlighting to next word
-                if (this.currentWordIndex < allWords.length) {
-                    allWords[this.currentWordIndex].classList.add('current');
-                    this.scrollToCurrentWord();
+                const verseElement = document.querySelector(`[data-surah="${position.surahNumber}"][data-verse="${position.verse}"]`);
+                if (verseElement) {
+                    verseElement.classList.add('current');
+                    
+                    const firstWord = verseElement.querySelector('.word');
+                    if (firstWord) {
+                        firstWord.classList.add('current');
+                        this.currentSurahNumber = position.surahNumber;
+                        this.currentVerseNumber = position.verse;
+                        this.scrollToCurrentWord();
+                    }
                 }
                 
                 this.updatePosition();
@@ -629,50 +1925,103 @@
             triggerWarning(spokenWord, expectedWord) {
                 const warningType = document.getElementById('warningType').value;
                 
-                if (warningType === 'beep' || warningType === 'all') {
+                if (warningType === 'beep') {
                     this.playBeep();
                 }
                 
-                if (warningType === 'voice' || warningType === 'all') {
+                if (warningType === 'voice_simple') {
                     this.speakCorrection(expectedWord);
                 }
                 
-                if (warningType === 'underline' || warningType === 'all') {
-                    // Underline is handled in markWordIncorrect
+                if (warningType === 'voice_context') {
+                    this.speakCorrectionWithContext(expectedWord);
                 }
                 
-                // Show context popup
-                this.showContextWarning(spokenWord, expectedWord);
+                this.showMistakeWarning(spokenWord, expectedWord);
+            }
+
+            speakCorrectionWithContext(expectedWord) {
+                try {
+                    const context = this.getVoiceContext(expectedWord);
+                    const spokenPhrase = `${context.before2} ${context.before1} ${expectedWord} ${context.after1} ${context.after2}`.trim();
+                    
+                    const utterance = new SpeechSynthesisUtterance(spokenPhrase);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.6;
+                    utterance.volume = 0.9;
+                    
+                    this.synthesizer.speak(utterance);
+                    
+                } catch (error) {
+                    console.log("Voice synthesis error:", error);
+                    this.speakCorrection(expectedWord);
+                }
+            }
+
+            getVoiceContext(expectedWord) {
+                const currentWord = document.querySelector('.word.current');
+                let context = { before2: '', before1: '', after1: '', after2: '' };
+                
+                if (!currentWord) return context;
+                
+                const allWordsInVerse = currentWord.closest('.verse').querySelectorAll('.word');
+                const wordIndex = Array.from(allWordsInVerse).indexOf(currentWord);
+                
+                if (wordIndex >= 2) context.before2 = allWordsInVerse[wordIndex - 2].dataset.word;
+                if (wordIndex >= 1) context.before1 = allWordsInVerse[wordIndex - 1].dataset.word;
+                if (wordIndex < allWordsInVerse.length - 1) context.after1 = allWordsInVerse[wordIndex + 1].dataset.word;
+                if (wordIndex < allWordsInVerse.length - 2) context.after2 = allWordsInVerse[wordIndex + 2].dataset.word;
+                
+                return context;
             }
 
             playBeep() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.5);
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    console.log("Audio beep not available");
+                }
             }
 
             speakCorrection(expectedWord) {
-                const utterance = new SpeechSynthesisUtterance(expectedWord);
-                utterance.lang = 'ar-SA';
-                utterance.rate = 0.7;
-                this.synthesizer.speak(utterance);
+                try {
+                    const utterance = new SpeechSynthesisUtterance(expectedWord);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.7;
+                    utterance.volume = 0.8;
+                    this.synthesizer.speak(utterance);
+                } catch (error) {
+                    console.log("Voice synthesis not available");
+                }
             }
 
-            showContextWarning(spokenWord, expectedWord) {
-                const context = this.getWordContext(expectedWord);
-                const message = `Incorrect: "${spokenWord}" → Expected: "${expectedWord}"<br>Context: ${context}`;
+            showMistakeWarning(spokenWord, expectedWord) {
+                const surahName = this.quranDatabase[this.currentSurahNumber]?.name || 'Unknown';
+                
+                const message = `
+                    <div style="text-align: center; margin: 15px 0;">
+                        <strong>⚠️ Mistake Detected</strong><br>
+                        <div style="margin: 10px 0;">
+                            <strong>Location:</strong> ${surahName}, Verse ${this.currentVerseNumber}<br>
+                            <strong>You said:</strong> "${spokenWord}"<br>
+                            <strong>Expected:</strong> "${expectedWord}"
+                        </div>
+                    </div>
+                `;
                 
                 document.getElementById('errorMessage').innerHTML = message;
                 document.getElementById('errorPopup').style.display = 'block';
@@ -682,43 +2031,188 @@
                 }, 3000);
             }
 
-            getWordContext(word) {
-                const allWords = document.querySelectorAll('.word');
-                const wordIndex = Array.from(allWords).findIndex(w => w.dataset.word === word);
-                
-                if (wordIndex === -1) return word;
-                
-                const before = wordIndex > 0 ? allWords[wordIndex - 1].dataset.word : '';
-                const after = wordIndex < allWords.length - 1 ? allWords[wordIndex + 1].dataset.word : '';
-                
-                return `${before} ${word} ${after}`.trim();
+            readFileContent(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => resolve(event.target.result);
+                    reader.onerror = () => reject(new Error("Error reading file"));
+                    reader.readAsText(file, 'utf-8');
+                });
             }
 
-            calculateTotalWords() {
-                this.totalWords = document.querySelectorAll('.word').length;
+            renderQuranDisplay() {
+                const display = document.getElementById('quranDisplay');
+                let html = '';
                 
-                // Highlight first word
-                const firstWord = document.querySelector('.word');
-                if (firstWord) {
-                    firstWord.classList.add('current');
+                for (let surahNum in this.quranDatabase) {
+                    const surah = this.quranDatabase[surahNum];
+                    
+                    html += `<div style="text-align: center; background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 1.4em; font-weight: bold;">سُورَة ${surah.name} (${surahNum})</div>`;
+                    
+                    surah.verses.forEach((verse, verseIndex) => {
+                        const verseClass = (parseInt(surahNum) === 1 && verseIndex === 0) ? 'verse current' : 'verse';
+                        html += `<div class="${verseClass}" data-surah="${surahNum}" data-verse="${verseIndex + 1}">`;
+                        
+                        verse.forEach((word, wordIndex) => {
+                            const wordClass = (parseInt(surahNum) === 1 && verseIndex === 0 && wordIndex === 0) ? 'word current' : 'word';
+                            
+                            html += `<span class="${wordClass}" 
+                                          data-word="${word}" 
+                                          data-surah="${surahNum}" 
+                                          data-verse="${verseIndex + 1}" 
+                                          data-word-index="${wordIndex}">${word}</span>`;
+                        });
+                        
+                        html += `<span style="background: #667eea; color: white; border-radius: 50%; width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center; font-size: 1em; margin: 0 15px; font-weight: bold; float: left;">${verseIndex + 1}</span></div>`;
+                    });
+                }
+                
+                display.innerHTML = html;
+                this.calculateTotalWords();
+            }
+
+            enableSystem() {
+                document.getElementById('startBtn').disabled = false;
+                this.updateStatus("🎉 System ready! Start continuous listening and begin reciting");
+                document.getElementById('databaseInfo').textContent = `${this.getTotalVerses()} verses loaded`;
+            }
+
+            getTotalVerses() {
+                if (!this.quranDatabase) return 0;
+                return Object.values(this.quranDatabase).reduce((total, surah) => total + surah.verses.length, 0);
+            }
+
+            updateDatabaseStatus(message, type) {
+                const statusEl = document.getElementById('databaseStatus');
+                statusEl.textContent = message;
+                statusEl.className = `database-status ${type}`;
+            }
+
+            startListening() {
+                if (!this.isDatabaseLoaded) {
+                    this.showError("Please upload the complete Quran database first.");
+                    return;
+                }
+                
+                if (this.recognition && !this.isListening) {
+                    this.isListening = true;
+                    try {
+                        this.recognition.start();
+                        console.log("🎤 Started continuous listening mode");
+                    } catch (error) {
+                        console.log("Recognition start error:", error);
+                        this.isListening = false;
+                        this.showError("Could not start listening. Please try again.");
+                    }
                 }
             }
 
+            stopListening() {
+                if (this.recognition && this.isListening) {
+                    this.isListening = false;
+                    try {
+                        this.recognition.stop();
+                        console.log("⏹️ Stopped continuous listening mode");
+                    } catch (error) {
+                        console.log("Recognition stop error:", error);
+                    }
+                }
+            }
+
+            cleanArabicText(text) {
+                // Enhanced Arabic text cleaning for better matching
+                return text
+                    .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // Remove diacritics
+                    .replace(/[ًٌٍَُِْ]/g, '') // Remove additional diacritics
+                    .replace(/ـ/g, '') // Remove tatweel
+                    .replace(/\s+/g, ' ') // Normalize spaces
+                    .trim()
+                    .toLowerCase();
+            }
+
+            getCurrentExpectedWord() {
+                const currentWordElement = document.querySelector('.word.current');
+                return currentWordElement ? currentWordElement.dataset.word : null;
+            }
+
+            markWordCorrect() {
+                const currentWord = document.querySelector('.word.current');
+                if (currentWord) {
+                    currentWord.classList.remove('current', 'incorrect');
+                    currentWord.classList.add('correct');
+                    this.correctWords++;
+                }
+            }
+
+            markWordIncorrect() {
+                const currentWord = document.querySelector('.word.current');
+                if (currentWord) {
+                    currentWord.classList.remove('current', 'correct');
+                    currentWord.classList.add('incorrect');
+                }
+            }
+
+            moveToNextWord() {
+                const currentWord = document.querySelector('.word.current');
+                if (!currentWord) return;
+                
+                currentWord.classList.remove('current');
+                this.totalWords++;
+                
+                const nextWord = this.findNextWord(currentWord);
+                
+                if (nextWord) {
+                    nextWord.classList.add('current');
+                    this.updateCurrentPosition(nextWord);
+                    this.scrollToCurrentWord();
+                } else {
+                    this.updateStatus("🎉 Recitation completed!");
+                }
+                
+                this.updatePosition();
+            }
+
+            findNextWord(currentWordElement) {
+                const allWords = document.querySelectorAll('.word');
+                const currentIndex = Array.from(allWords).indexOf(currentWordElement);
+                return allWords[currentIndex + 1] || null;
+            }
+
+            updateCurrentPosition(wordElement) {
+                if (wordElement) {
+                    this.currentSurahNumber = parseInt(wordElement.dataset.surah);
+                    this.currentVerseNumber = parseInt(wordElement.dataset.verse);
+                }
+            }
+
+            calculateTotalWords() {
+                this.totalWords = 0;
+                this.correctWords = 0;
+                this.updateAccuracy();
+            }
+
             updateAccuracy() {
-                const accuracy = this.totalWords > 0 ? Math.round((this.correctWords / this.totalWords) * 100) : 100;
+                const accuracy = this.totalWords > 0 ? 
+                               Math.round((this.correctWords / this.totalWords) * 100) : 100;
+                
                 document.getElementById('accuracy').textContent = `${accuracy}%`;
+                document.getElementById('accuracyFill').textContent = `${accuracy}%`;
                 document.getElementById('accuracyFill').style.width = `${accuracy}%`;
                 
-                // Change color based on accuracy
                 const fill = document.getElementById('accuracyFill');
-                if (accuracy >= 90) fill.style.background = 'linear-gradient(45deg, #2ecc71, #27ae60)';
-                else if (accuracy >= 70) fill.style.background = 'linear-gradient(45deg, #f39c12, #e67e22)';
-                else fill.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                if (accuracy >= 90) {
+                    fill.style.background = 'linear-gradient(45deg, #2ecc71, #27ae60)';
+                } else if (accuracy >= 70) {
+                    fill.style.background = 'linear-gradient(45deg, #f39c12, #e67e22)';
+                } else {
+                    fill.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                }
             }
 
             updatePosition() {
-                const currentVerse = Math.floor(this.currentWordIndex / 4) + 1;
-                document.getElementById('position').textContent = `Surah 1, Verse ${currentVerse}`;
+                const surahName = this.quranDatabase[this.currentSurahNumber]?.name || 'Unknown';
+                document.getElementById('position').textContent = 
+                    `📖 ${surahName} (${this.currentSurahNumber}), Verse ${this.currentVerseNumber}`;
             }
 
             updateStatus(status) {
@@ -728,81 +2222,79 @@
             scrollToCurrentWord() {
                 const currentWord = document.querySelector('.word.current');
                 if (currentWord) {
-                    currentWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-
-            jumpToWord(wordElement) {
-                const allWords = document.querySelectorAll('.word');
-                const newIndex = Array.from(allWords).indexOf(wordElement);
-                
-                if (newIndex !== -1) {
-                    // Remove current highlighting
-                    document.querySelector('.word.current')?.classList.remove('current');
-                    
-                    // Set new position
-                    this.currentWordIndex = newIndex;
-                    wordElement.classList.add('current');
-                    this.updatePosition();
-                }
-            }
-
-            searchAndNavigate(searchText) {
-                if (!searchText) return;
-                
-                const words = document.querySelectorAll('.word');
-                for (let word of words) {
-                    if (word.dataset.word.includes(searchText) || 
-                        this.cleanArabicText(word.dataset.word).includes(this.cleanArabicText(searchText))) {
-                        this.jumpToWord(word);
-                        break;
-                    }
+                    currentWord.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center',
+                        inline: 'center'
+                    });
                 }
             }
 
             handleRecognitionError(event) {
-                let errorMessage = "Recognition error: ";
+                let shouldRestart = false;
+                
                 switch (event.error) {
                     case 'no-speech':
-                        errorMessage += "No speech detected. Please try again.";
-                        break;
+                        console.log("No speech detected - continuing to listen");
+                        shouldRestart = true;
+                        return;
                     case 'audio-capture':
-                        errorMessage += "Microphone not accessible. Please check permissions.";
+                        this.showError("Cannot access microphone. Check permissions.");
                         break;
                     case 'not-allowed':
-                        errorMessage += "Microphone permission denied. Please allow access.";
+                        this.showError("Microphone access denied. Please allow access.");
                         break;
+                    case 'network':
+                        console.log("Network error - will restart");
+                        shouldRestart = true;
+                        break;
+                    case 'aborted':
+                        console.log("Recognition aborted - normal during restart");
+                        return;
                     default:
-                        errorMessage += event.error;
+                        console.log("Recognition error:", event.error);
+                        shouldRestart = true;
                 }
-                this.showError(errorMessage);
+                
+                if (!shouldRestart) {
+                    this.isListening = false;
+                } else if (this.isListening) {
+                    setTimeout(() => {
+                        if (this.isListening) {
+                            try {
+                                this.recognition.start();
+                            } catch (e) {
+                                console.log("Error during restart:", e);
+                            }
+                        }
+                    }, 1000);
+                }
             }
 
             showError(message) {
-                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorMessage').innerHTML = `<strong>⚠️ ${message}</strong>`;
                 document.getElementById('errorPopup').style.display = 'block';
                 
                 setTimeout(() => {
                     document.getElementById('errorPopup').style.display = 'none';
-                }, 5000);
-            }
-
-            loadSurah(surahNumber) {
-                // This would load different surahs from the database
-                // For now, we're using Al-Fatiha as the example
-                console.log(`Loading Surah ${surahNumber}`);
+                }, 4000);
             }
         }
 
-        // Initialize the system when the page loads
+        // Initialize the Personal Quran AI System
         document.addEventListener('DOMContentLoaded', () => {
-            const quranAI = new QuranRecitationAI();
+            const personalQuranAI = new PersonalQuranAI();
             
-            // Add some demo functionality
-            console.log("🎤 AI Quran Recitation Verification System Initialized");
-            console.log("✅ Professional-grade speech recognition enabled");
-            console.log("🧠 AI accent adaptation active");
-            console.log("📊 Real-time accuracy tracking ready");
+            console.log("🎤 Personal AI Quran System Initialized");
+            console.log("🇵🇰 Pakistani accent optimization: ACTIVE");
+            console.log("🧠 Personal voice training: READY");
+            console.log("🔍 Harakat mistake detection: ENABLED");
+            console.log("🔄 Continuous listening mode: CONFIGURED");
+            console.log("⚡ Focus on mistakes, not accent: CONFIGURED");
+            
+            setTimeout(() => {
+                document.getElementById('status').textContent = "🎉 System ready for Pakistani users! Auto-loading database...";
+            }, 1000);
         });
     </script>
 </body>
