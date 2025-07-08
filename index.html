@@ -126,6 +126,7 @@
             font-size: 1em;
             margin: 10px 0;
             width: 100%;
+            display: none; /* Initially hidden */
         }
 
         select {
@@ -398,6 +399,10 @@
             border-bottom: 3px solid #667eea;
             font-weight: bold;
         }
+        
+        #loadQuranBtn {
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
@@ -589,6 +594,64 @@
                 }
                 
                 this.setupRecognitionHandlers();
+            }
+
+            async autoLoadQuranDatabase() {
+                const githubRawUrl = 'https://raw.githubusercontent.com/msaym22/quran-resitation/main/quran-simple.txt';
+                
+                try {
+                    this.updateDatabaseStatus("📚 Loading Quran database from GitHub...", "loading");
+                    
+                    // Try GitHub first
+                    const response = await fetch(githubRawUrl);
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text && text.trim().length > 1000) {
+                            this.parseCompleteQuranDatabase(text);
+                            this.renderQuranDisplay();
+                            this.enableSystem();
+                            this.updateDatabaseStatus(`✅ Quran loaded from GitHub: ${this.getTotalVerses()} verses`, "success");
+                            return;
+                        }
+                    }
+                    
+                    // If GitHub fails, show upload option
+                    this.updateDatabaseStatus("❌ GitHub load failed. Please upload database manually.", "error");
+                    document.getElementById('loadQuranBtn').style.display = 'block';
+                    document.getElementById('quranFileInput').style.display = 'block';
+                    
+                } catch (error) {
+                    this.updateDatabaseStatus(`❌ GitHub load failed: ${error.message}. Please upload manually.`, "error");
+                    document.getElementById('loadQuranBtn').style.display = 'block';
+                    document.getElementById('quranFileInput').style.display = 'block';
+                }
+            }
+
+            async loadCompleteQuranFile() {
+                const fileInput = document.getElementById('quranFileInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    this.showError("Please select your complete quran-simple.txt file.");
+                    return;
+                }
+
+                try {
+                    this.updateDatabaseStatus("📚 Loading complete Quran database...", "loading");
+                    
+                    const text = await this.readFileContent(file);
+                    this.parseCompleteQuranDatabase(text);
+                    this.renderQuranDisplay();
+                    this.enableSystem();
+                    
+                    this.updateDatabaseStatus(`✅ Complete Quran loaded: ${this.getTotalVerses()} verses`, "success");
+                    this.showError("✅ Quran database successfully loaded from your file!");
+                    
+                } catch (error) {
+                    this.updateDatabaseStatus("❌ Error loading database", "error");
+                    this.showError(`Error loading file: ${error.message}`);
+                }
             }
 
             initializeVisualization() {
@@ -1718,62 +1781,6 @@
                 }
             }
 
-            async autoLoadQuranDatabase() {
-                const localPath = './quran-simple.txt';
-                const githubRawUrl = 'https://raw.githubusercontent.com/msaym22/quran-resitation/main/quran-simple.txt';
-                
-                try {
-                    this.updateDatabaseStatus("📚 Loading Quran database...", "loading");
-                    
-                    // Try local first
-                    let response = await fetch(localPath);
-                    
-                    // If local fails, try GitHub
-                    if (!response.ok) {
-                        response = await fetch(githubRawUrl);
-                    }
-                    
-                    if (response.ok) {
-                        const text = await response.text();
-                        if (text && text.trim().length > 1000) {
-                            this.parseCompleteQuranDatabase(text);
-                            this.renderQuranDisplay();
-                            this.enableSystem();
-                            this.updateDatabaseStatus(`✅ Quran loaded: ${this.getTotalVerses()} verses`, "success");
-                            return;
-                        }
-                    }
-                    this.updateDatabaseStatus("❌ Error loading database. Upload manually.", "error");
-                } catch (error) {
-                    this.updateDatabaseStatus(`❌ Load failed: ${error.message}`, "error");
-                }
-            }
-
-            async loadCompleteQuranFile() {
-                const fileInput = document.getElementById('quranFileInput');
-                const file = fileInput.files[0];
-                
-                if (!file) {
-                    this.showError("Please select your complete quran-simple.txt file.");
-                    return;
-                }
-
-                try {
-                    this.updateDatabaseStatus("📚 Loading complete Quran database...", "loading");
-                    
-                    const text = await this.readFileContent(file);
-                    this.parseCompleteQuranDatabase(text);
-                    this.renderQuranDisplay();
-                    this.enableSystem();
-                    
-                    this.updateDatabaseStatus(`✅ Complete Quran loaded: ${this.getTotalVerses()} verses`, "success");
-                    
-                } catch (error) {
-                    this.updateDatabaseStatus("❌ Error loading database", "error");
-                    this.showError(`Error loading file: ${error.message}`);
-                }
-            }
-
             parseCompleteQuranDatabase(text) {
                 const lines = text.split('\n');
                 this.quranDatabase = {};
@@ -2061,7 +2068,7 @@
             console.log("🔄 Continuous listening mode: CONFIGURED");
             
             setTimeout(() => {
-                document.getElementById('status').textContent = "🎉 System ready for Pakistani users! Auto-loading database...";
+                document.getElementById('status').textContent = "🎉 System ready! Loading Quran database from GitHub...";
             }, 1000);
         });
     </script>
