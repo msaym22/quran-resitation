@@ -20,8 +20,6 @@
                 <h3>Audio Control</h3>
                 <button id="startBtn" class="btn" disabled>Start Listening</button>
                 <button id="stopBtn" class="btn" disabled>Stop Listening</button>
-                <input type="file" id="audioUpload" class="file-input" accept="audio/*">
-                <button id="uploadBtn" class="btn">Upload Recording</button>
                 <select id="languageSelect">
                     <option value="ur-PK">Urdu/Pakistani Arabic</option>
                     <option value="ar-SA">Standard Arabic</option>
@@ -33,10 +31,6 @@
                 <select id="errorFocusType">
                     <option value="pronunciation">Pronunciation Mistakes</option>
                     <option value="words">Word Mistakes</option>
-                </select>
-                <select id="warningType">
-                    <option value="voice">Voice with Context (2 words before/after)</option>
-                    <option value="visual">Visual Highlighting Only</option>
                 </select>
             </div>
         </div>
@@ -92,6 +86,7 @@
                 this.currentMistakes = [];
                 this.recitationHistory = [];
                 this.sessionStartTime = null;
+                this.positionDetected = false;
                 this.initialize();
             }
 
@@ -107,8 +102,6 @@
                 document.getElementById('languageSelect').addEventListener('change', (e) => {
                     if (this.recognition) this.recognition.lang = e.target.value;
                 });
-                document.getElementById('uploadBtn').addEventListener('click', () => document.getElementById('audioUpload').click());
-                document.getElementById('audioUpload').addEventListener('change', (e) => this.processAudioUpload(e.target.files[0]));
                 document.getElementById('mistakesTab').addEventListener('click', () => this.showMistakesPanel());
                 document.getElementById('historyTab').addEventListener('click', () => this.showHistoryPanel());
                 document.getElementById('loadQuranBtn').addEventListener('click', () => this.handleManualUpload());
@@ -129,7 +122,7 @@
             }
 
             async loadQuranDatabase() {
-                const githubUrl = 'https://raw.githubusercontent.com/msaym22/quran-resitation/main/quran-simple.txt';
+                const githubUrl = 'https://raw.githubusercontent.com/your-username/your-repo/main/quran-simple.txt';
                 try {
                     const response = await fetch(githubUrl);
                     if (!response.ok) throw new Error("GitHub load failed");
@@ -265,6 +258,7 @@
                     document.getElementById('stopBtn').disabled = false;
                     document.getElementById('startBtn').classList.add('recording');
                     this.sessionStartTime = new Date();
+                    this.positionDetected = false;
                 };
                 this.recognition.onend = () => {
                     if (this.isListening) this.recognition.start();
@@ -278,34 +272,34 @@
                 };
             }
 
-            processAudioUpload(file) {
-                if (!file) return;
-                this.showError("Processing uploaded audio...");
-                setTimeout(() => {
-                    this.showError("Audio processed! System optimized for your recitation style.");
-                }, 3000);
-            }
-
             processRecitation(text) {
                 const words = text.trim().split(/\s+/);
-                if (!this.currentWordElement) {
+                
+                if (!this.positionDetected) {
                     const detected = this.detectPosition(words);
                     if (detected) {
                         this.currentSurah = detected.surah;
                         this.currentVerse = detected.verse;
-                        this.currentWord = detected.wordIndex || 0;
+                        this.currentWord = detected.wordIndex;
+                        this.positionDetected = true;
                         this.updatePosition();
                         this.highlightCurrentWord();
+                        this.showError(`Position detected: ${this.quranDatabase[this.currentSurah].name} ${this.currentVerse}:${this.currentWord + 1}`);
+                    } else {
+                        this.updateStatus("Listening... Please recite at least 3 consecutive words from the Quran");
                     }
                     return;
                 }
+
                 const currentVerse = this.quranDatabase[this.currentSurah].verses[this.currentVerse - 1];
                 const expectedWord = currentVerse[this.currentWord];
+                
                 if (this.compareWords(words[0], expectedWord)) {
                     this.markWordCorrect();
                 } else {
                     this.markWordIncorrect(words[0], expectedWord);
                 }
+                
                 this.moveToNextWord();
             }
 
@@ -325,8 +319,21 @@
                 if (wordElement) {
                     wordElement.classList.add('incorrect');
                     this.recordMistake(spoken, expected);
-                    this.provideFeedback(spoken, expected);
+                    this.speakContextWords();
                 }
+            }
+
+            speakContextWords() {
+                const verse = this.quranDatabase[this.currentSurah].verses[this.currentVerse - 1];
+                const start = Math.max(0, this.currentWord - 2);
+                const end = Math.min(verse.length - 1, this.currentWord + 2);
+                const contextWords = verse.slice(start, end + 1).join(' ');
+                
+                const utterance = new SpeechSynthesisUtterance();
+                utterance.text = contextWords;
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
             }
 
             recordMistake(spoken, expected) {
@@ -353,31 +360,6 @@
                         You said: "${mistake.spoken}"<br>Expected: "${mistake.expected}"`;
                     list.appendChild(item);
                 });
-            }
-
-            provideFeedback(spoken, expected) {
-                const warningType = document.getElementById('warningType').value;
-                if (warningType === 'voice') this.speakWithContext(spoken, expected);
-                this.showMistake(spoken, expected);
-            }
-
-            speakWithContext(spoken, expected) {
-                const context = this.getWordContext();
-                const utterance = new SpeechSynthesisUtterance();
-                utterance.text = `You said ${spoken}, should be ${expected}. Context: ${context.before2} ${context.before1} ${expected} ${context.after1} ${context.after2}`;
-                utterance.lang = 'ar-SA';
-                utterance.rate = 0.8;
-                window.speechSynthesis.speak(utterance);
-            }
-
-            getWordContext() {
-                const verse = this.quranDatabase[this.currentSurah].verses[this.currentVerse - 1];
-                const context = { before2: '', before1: '', after1: '', after2: '' };
-                if (this.currentWord > 1) context.before2 = verse[this.currentWord - 2];
-                if (this.currentWord > 0) context.before1 = verse[this.currentWord - 1];
-                if (this.currentWord < verse.length - 1) context.after1 = verse[this.currentWord + 1];
-                if (this.currentWord < verse.length - 2) context.after2 = verse[this.currentWord + 2];
-                return context;
             }
 
             moveToNextWord() {
@@ -410,19 +392,30 @@
             }
 
             detectPosition(words) {
+                if (words.length < 3) return null;
+                
                 for (const [surahNum, surah] of Object.entries(this.quranDatabase)) {
                     for (let verseNum = 0; verseNum < surah.verses.length; verseNum++) {
                         const verse = surah.verses[verseNum];
                         if (!verse) continue;
+                        
                         for (let i = 0; i <= verse.length - words.length; i++) {
-                            let match = true;
+                            let matchCount = 0;
                             for (let j = 0; j < words.length; j++) {
-                                if (!this.compareWords(words[j], verse[i + j])) {
-                                    match = false;
+                                if (this.compareWords(words[j], verse[i + j])) {
+                                    matchCount++;
+                                } else {
                                     break;
                                 }
                             }
-                            if (match) return { surah: parseInt(surahNum), verse: verseNum + 1, wordIndex: i };
+                            
+                            if (matchCount >= 3) {
+                                return {
+                                    surah: parseInt(surahNum),
+                                    verse: verseNum + 1,
+                                    wordIndex: i
+                                };
+                            }
                         }
                     }
                 }
@@ -438,17 +431,12 @@
                 document.getElementById('position').textContent = `${surahName} (${this.currentSurah}), Verse ${this.currentVerse}`;
             }
 
-            showMistake(spoken, expected) {
-                document.getElementById('errorMessage').textContent = `You said: "${spoken}"\nExpected: "${expected}"`;
+            showError(message) {
+                document.getElementById('errorMessage').textContent = message;
                 document.getElementById('errorPopup').style.display = 'block';
                 setTimeout(() => {
                     document.getElementById('errorPopup').style.display = 'none';
                 }, 3000);
-            }
-
-            showError(message) {
-                document.getElementById('errorMessage').textContent = message;
-                document.getElementById('errorPopup').style.display = 'block';
             }
 
             startListening() {
